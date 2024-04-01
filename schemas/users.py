@@ -6,11 +6,11 @@ import datetime
 
 class users(SC_BaseModel):
     id:Optional[int] = None
-    nome: str
+    name: str
     email:EmailStr
     CPF: str
-    created_at:datetime
-    updated_at:datetime
+    created_at:datetime.datetime
+    updated_at:datetime.datetime
     updated_by:Optional[int] = None
     active:Optional[bool] = True
     
@@ -18,10 +18,11 @@ class users(SC_BaseModel):
         orm_mode = True
 
 class users_update(users):
-    nome:Optional[str] = None 
+    name:Optional[str] = None 
     email:Optional[EmailStr] = None
     CPF: Optional[str] = None
-    updated_at:datetime = datetime.datetime.now()
+    password:Optional[str] = None
+    updated_at:datetime.datetime = datetime.datetime.now()
     updated_by:int
     active:Optional[bool] = True
 

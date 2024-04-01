@@ -1,0 +1,16 @@
+you will create a file .env with all params below
+
+#CONFIG
+VERSION = ''
+
+#JWT
+SECRET = ''
+ALGORITHM = ''
+ACCESS_TOKEN_EXPIRE_MINUTES = 0
+
+#DATABASE TIP
+DATABASE_USER = ''
+DATABASE_PASS = ''
+DATABASE_SERVER = ''
+DATABASE_PORT = ''
+DATABASE_NAME = ''
