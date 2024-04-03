@@ -1,4 +1,4 @@
-from sqlalchemy import Column,Integer, String, Boolean,DateTime,ForeignKey,Null
+from sqlalchemy import Column,Integer, String, Boolean,Date,ForeignKey,Null,DateTime
 from sqlalchemy.orm import relationship
 from core.configs import settings
 #from pydantic import EmailStr, use no schema e não no model
@@ -12,12 +12,12 @@ class Users(settings.DB_BaseModel):
     email = Column(String(50),nullable=False)
     CPF = Column(String(12), unique=True,nullable=False)
     created_at = Column(DateTime,default=datetime.datetime.now())
-    updated_at = Column(DateTime,default=Null,onupdate=datetime.datetime.now())
+    updated_at = Column(Date,default=Null,onupdate=datetime.date.today(),nullable=True)
     updated_by = Column(Integer, ForeignKey('users.id'),nullable=True)
     active = Column(Boolean,default=True)
     
     #relashionship
-    fk_updated_by = relationship("users",remote_side=[id])
+    fk_updated_by = relationship("Users",remote_side=[id])
     #o campo updated_by esta autorelacionado com id, para registrar qual usuário alterou o cadastro de um outro, como forma de controle.
     
 

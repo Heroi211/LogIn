@@ -9,8 +9,8 @@ class users(SC_BaseModel):
     name: str
     email:EmailStr
     CPF: str
-    created_at:datetime.datetime
-    updated_at:datetime.datetime
+    created_at:Optional[datetime.datetime] = datetime.datetime.now()
+    updated_at:Optional[datetime.date] = None
     updated_by:Optional[int] = None
     active:Optional[bool] = True
     
@@ -22,7 +22,7 @@ class users_update(users):
     email:Optional[EmailStr] = None
     CPF: Optional[str] = None
     password:Optional[str] = None
-    updated_at:datetime.datetime = datetime.datetime.now()
+    updated_at:datetime.date = datetime.date.today()
     updated_by:int
     active:Optional[bool] = True
 

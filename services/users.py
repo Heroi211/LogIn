@@ -6,15 +6,14 @@ from fastapi import HTTPException,status,Response
 from sqlalchemy.future import select
 from typing import List
 
-
 async def register_user(user:users_schemas.users_create,db:AsyncSession) -> users_models: 
     new_user:users_models=users_models(name =user.name,email=user.email,
-                                       CPF=user.CPF,created_at=datetime.datetime.now(),
-                                       updated_at=datetime.datetime.now())
+                                       CPF=user.CPF,password=user.password,updated_at = datetime.date.today()
+                                       )
     async with db as session:
             session.add(new_user)
             await session.commit()
-            await session.refresh()
+            await session.refresh(new_user)
             return new_user
 
 async def select_all_users(db:AsyncSession) -> List[users_schemas.users]:
