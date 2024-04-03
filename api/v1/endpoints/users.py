@@ -42,7 +42,7 @@ async def put_user(id_user:int,user:users_schemas.users_update, db:AsyncSession 
 @router.delete('/{id_user}',status_code=status.HTTP_204_NO_CONTENT)
 async def delete_user(id_user,db:AsyncSession = Depends(get_session)):
     try:
-        users_service.drop_user(id_user,db)
+        await users_service.drop_user(id_user,db)
         return Response (status_code=status.HTTP_204_NO_CONTENT)
     except HTTPException:
         raise HTTPException(status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,detail='Erro que ninguém sabe de onde vem')

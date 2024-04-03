@@ -23,7 +23,7 @@ class users_update(users):
     CPF: Optional[str] = None
     password:Optional[str] = None
     updated_at:datetime.date = datetime.date.today()
-    updated_by:int
+    updated_by:Optional[int] = None
     active:Optional[bool] = True
 
 class users_create(users):

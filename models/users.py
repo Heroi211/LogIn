@@ -17,7 +17,7 @@ class Users(settings.DB_BaseModel):
     active = Column(Boolean,default=True)
     
     #relashionship
-    fk_updated_by = relationship("Users",remote_side=[id])
+    fk_updated_by = relationship("Users",remote_side=[id],backref="updated_user",cascade="all,delete-orphan")
     #o campo updated_by esta autorelacionado com id, para registrar qual usuário alterou o cadastro de um outro, como forma de controle.
     
 

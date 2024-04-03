@@ -42,21 +42,20 @@ async def update_user(id_user:int,user:users_schemas.users_update,db:AsyncSessio
                 user_up.name = user.name
             if user.email:
                 user_up.email = user.email
-            if user.CPF:
-                user_up.CPF = user.CPF
-            if user.active:
+            if user_up.active != user.active:
                 user_up.active = user.active
             if user.password:
                 user_up.password = user.password
             
-            user_up.updated_at = datetime.datetime.now()
+            user_up.updated_at = datetime.date.today()
+            user_up.updated_by = id_user #usuario_logado() implementar depois do JWT
             
             await session.commit()
             return user_up
     
 async def drop_user(id_user:int, db:AsyncSession):
     async with db as session:
-        querie = select(users_models).filter(users_models.id==id_user)
+        querie = select(users_models).filter(users_models.id==int(id_user))
         result_set = await session.execute(querie)
         user_delete:users_schemas.users = result_set.scalars().unique().one_or_none()
         if user_delete:
