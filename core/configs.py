@@ -11,8 +11,8 @@ env_path = Path('.')/'.env'
 load_dotenv(dotenv_path=env_path)
 
 class Settings(BaseSettings):
-    PROJECT_NAME = 'Log-In'
-    PROJECT_VERSION = os.getenv('VERSION')
+    PROJECT_NAME =  os.getenv('PROJECT_NAME')
+    PROJECT_VERSION = os.getenv('PROJECT_VERSION')
     
     DATABASE_USER: str = os.getenv('DATABASE_USER')
     DATABASE_PASS: str = os.getenv('DATABASE_PASS')
@@ -31,5 +31,6 @@ class Settings(BaseSettings):
         sensitive_case = True
 
 settings:Settings = Settings()
+        
         
         
