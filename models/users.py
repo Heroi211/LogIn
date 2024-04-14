@@ -12,16 +12,12 @@ class Users(settings.DB_BaseModel):
     email = Column(String(50),nullable=False)
     CPF = Column(String(12), unique=True,nullable=False)
     created_at = Column(DateTime,default=datetime.datetime.now())
-    updated_at = Column(Date,default=Null,onupdate=datetime.date.today(),nullable=True)
-    role_id = Column(Integer,ForeignKey='roles.id')
+    role_id = Column(Integer,ForeignKey('roles.id'))
     active = Column(Boolean,default=True)
     
-    role = relationship("Roles",back_populates='roles', lazy='joined')
-    #relashionship
-    #fk_updated_by = relationship("Users",remote_side=[id],backref="updated_user",cascade="all,delete-orphan")
-    #o campo updated_by esta autorelacionado com id, para registrar qual usuário alterou o cadastro de um outro, como forma de controle.
+    #relação da FK pra apontar o relacionamento de role para usuario. 1xN
+    role = relationship("Roles",lazy='joined')
     
-
     
  
     
