@@ -5,10 +5,16 @@ import datetime
 from fastapi import HTTPException,status,Response
 from sqlalchemy.future import select
 from typing import List
+from core.security import get_password_hash
+from core.auth import authenticate_user
 
+async def login_user(CPF:str,password:str,db:AsyncSession):
+    user = authenticate_user(CPF,password,db)
+    return user
+    
 async def register_user(user:users_schemas.users_create,db:AsyncSession) -> users_models: 
     new_user:users_models=users_models(name =user.name,email=user.email,
-                                       CPF=user.CPF,password=user.password,updated_at = datetime.date.today()
+                                       CPF=user.CPF,password=get_password_hash(user.password),updated_at = datetime.date.today()
                                        )
     async with db as session:
             session.add(new_user)
@@ -45,7 +51,7 @@ async def update_user(id_user:int,user:users_schemas.users_update,db:AsyncSessio
             if user_up.active != user.active:
                 user_up.active = user.active
             if user.password:
-                user_up.password = user.password
+                user_up.password = get_password_hash(user.password)
             
             user_up.updated_at = datetime.date.today()
             user_up.updated_by = id_user #usuario_logado() implementar depois do JWT

@@ -1,22 +1,44 @@
 from fastapi import APIRouter,HTTPException,status,Depends,Response
+from fastapi.security import OAuth2PasswordRequestForm
+from fastapi.responses import JSONResponse
 from models.users import Users as users_models
 
 from schemas import users as users_schemas
-from core.deps import get_session
+from core.deps import get_session,get_current_user
 from typing import List
 from sqlalchemy.future import select
 from sqlalchemy.ext.asyncio import AsyncSession
 import datetime
 from services import users as users_service
+from sqlalchemy.exc import IntegrityError
+from core.auth import _generate_access_token
 
 router = APIRouter()
 
-#POST user
-@router.post('/', response_model=users_schemas.users,status_code=status.HTTP_201_CREATED)
+#POST user / signup
+@router.post('/signup', response_model=users_schemas.users,status_code=status.HTTP_201_CREATED)
 async def post_user(user: users_schemas.users_create,db:AsyncSession = Depends(get_session)):
-    new_user:users_models = await users_service.register_user(user,db)
-    return new_user
+    try:
+        new_user:users_models = await users_service.register_user(user,db)
+        return new_user
+    except IntegrityError:
+        raise HTTPException(status_code=status.HTTP_406_NOT_ACCEPTABLE,detail="Usuário já cadastrado na base de dados")
+
+#POST Login
+@router.post('/login')
+async def login(form_data:OAuth2PasswordRequestForm = Depends(),db:AsyncSession = Depends(get_session)):
+    user = await users_service.login_user(form_data.CPF,form_data.password,db)
+    if not user:
+        raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST,
+                            detail="Dados incorretos")
     
+    return JSONResponse(content={"access_token":_generate_access_token(sub=user.id), "token_type":"bearer"},status_code=status.HTTP_200_OK)
+
+#GET Logged
+@router.get('/logged', response_model=users_schemas.users)
+def get_logged(user_logged :users_models = Depends(get_current_user)):
+    return user_logged
+
 #GET users
 @router.get('/', response_model=List[users_schemas.users])
 async def get_users(db:AsyncSession = Depends(get_session)):
@@ -24,7 +46,7 @@ async def get_users(db:AsyncSession = Depends(get_session)):
     return users
     
 #GET user
-@router.get('/{id_user}',response_model=users_schemas.users,status_code=status.HTTP_200_OK)
+@router.get('/{id_user}',response_model=users_schemas.users,status_code=status.HTTP_202_ACCEPTED)
 async def get_user(id_user : int, db:AsyncSession = Depends(get_session)):
     user:users_schemas.users = await users_service.select_user(id_user,db)
     if user:
