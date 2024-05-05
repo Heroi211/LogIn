@@ -8,6 +8,7 @@ from core.security import verify_password
 from datetime import datetime,timedelta
 import os
 from jose import jwt
+from pytz import timezone as TZ
 
 oauth2_scheme = OAuth2PasswordBearer(tokenUrl=f"{settings.PROJECT_VERSION}/users/login")
 
@@ -29,7 +30,7 @@ async def authenticate_user(CPF:str,password:str, db:AsyncSession) -> Optional[u
 def _generate_token(type_token:str,life_time:timedelta,sub:str)->str:
     payload={}
     
-    timezone = os.getenv('TIMEZONE')
+    timezone = TZ(os.getenv('TIMEZONE'))
     expire = datetime.now(tz=timezone)+life_time
     
     payload["type"] = type_token
@@ -42,6 +43,6 @@ def _generate_token(type_token:str,life_time:timedelta,sub:str)->str:
 def _generate_access_token(sub:str) ->str:
     return _generate_token(
         type_token='access_token',
-        life_time=timedelta(minutes=settings.ACCESS_TOKEN_EXPIRE_MINUTES),
+        life_time=timedelta(minutes=float(settings.ACCESS_TOKEN_EXPIRE_MINUTES)),
         sub=sub
     )

@@ -1,4 +1,4 @@
-from schemas import roles as roles_schemas
+from schemas import roles_schemas as roles_schemas
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy.future import select
 
