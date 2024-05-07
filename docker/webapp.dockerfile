@@ -10,5 +10,6 @@ WORKDIR /var/www
 RUN pip install --upgrade pip
 RUN pip install --no-cache-dir -r ./requirements.txt
 
-ENTRYPOINT python main.py
 EXPOSE 8000
+ENTRYPOINT python main.py
+
