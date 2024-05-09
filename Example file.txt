@@ -1,12 +1,17 @@
 you will create a file .env with all params below
 
 #CONFIG
-VERSION = ''
+PROJECT_NAME = ''
+PROJECT_VERSION = ''
 
 #JWT
 SECRET = ''
+import secrets   
+token: str = secrets.token_urlsafe(32)
+
 ALGORITHM = ''
 ACCESS_TOKEN_EXPIRE_MINUTES = 0
+TIMEZONE = ''
 
 #DATABASE TIP
 DATABASE_USER = ''

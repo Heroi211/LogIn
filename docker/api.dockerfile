@@ -2,7 +2,7 @@ FROM python:3.11-alpine
 LABEL maintainer "Gabriel Drumond <gabriel_s4@hotmail.com>"
 ENV PYTHONUNBUFFERED 1
 ENV PYTHONDONTWRITEBYTECODE 1
-RUN sudo apt update && sudo apt upgrade && sudo apt add --no-cache build-base freetds openssl freetds-dev libressl-dev krb5-dev
+RUN apk update && apk upgrade && apk add postgresql-dev python3-dev --no-cache build-base freetds freetds-dev  openssl krb5-dev
 
 COPY . /var/www
 WORKDIR /var/www

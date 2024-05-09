@@ -1,0 +1,32 @@
+version: "2.26.1"
+
+services:
+  db_login:
+    build:
+      dockerfile: ./docker/db.dockerfile
+      context: .
+    image: login_database:v1
+    container_name: database_login
+    ports:
+      - "5432"
+    networks:
+      - nwlogin
+
+  api_login:
+    build:
+      dockerfile: ./docker/api.dockerfile
+      context: .
+    image: login_api:v1
+    container_name: api_login
+    command: sh -c "python main.py"
+    depends_on:
+      - db_login
+    ports:
+      - 8000:8000
+    networks:
+      - nwlogin
+
+networks:
+  nwlogin:
+    name: "nwlogin"
+    driver: "bridge"
