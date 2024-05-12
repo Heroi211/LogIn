@@ -1,15 +1,20 @@
 from models.users import Users as users_models
-from schemas import users as users_schemas
+from schemas import users_schemas as users_schemas
 from sqlalchemy.ext.asyncio import AsyncSession
 import datetime
 from fastapi import HTTPException,status,Response
 from sqlalchemy.future import select
 from typing import List
+from core.security import get_password_hash
+from core.auth import authenticate_user
 
+async def login_user(CPF:str,password:str,db:AsyncSession):
+    user = await authenticate_user(CPF,password,db)
+    return user
+    
 async def register_user(user:users_schemas.users_create,db:AsyncSession) -> users_models: 
     new_user:users_models=users_models(name =user.name,email=user.email,
-                                       CPF=user.CPF,password=user.password,updated_at = datetime.date.today()
-                                       )
+                                       CPF=user.CPF,password=get_password_hash(user.password))
     async with db as session:
             session.add(new_user)
             await session.commit()
@@ -18,7 +23,7 @@ async def register_user(user:users_schemas.users_create,db:AsyncSession) -> user
 
 async def select_all_users(db:AsyncSession) -> List[users_schemas.users]:
     async with db as session:
-        querie = select(users_models)
+        querie = select(users_models).order_by(users_models.id.asc())
         resultset = await session.execute(querie)
         users:List[users_schemas.users] = resultset.scalars().unique().all()
         return users
@@ -45,10 +50,9 @@ async def update_user(id_user:int,user:users_schemas.users_update,db:AsyncSessio
             if user_up.active != user.active:
                 user_up.active = user.active
             if user.password:
-                user_up.password = user.password
-            
-            user_up.updated_at = datetime.date.today()
-            user_up.updated_by = id_user #usuario_logado() implementar depois do JWT
+                user_up.password = get_password_hash(user.password),
+            if user.role_id:
+                user_up.role_id = user.role_id
             
             await session.commit()
             return user_up

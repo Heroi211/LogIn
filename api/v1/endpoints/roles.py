@@ -1,8 +1,8 @@
 from fastapi import APIRouter,HTTPException, status,Depends,Response
-from schemas import roles as roles_schemas
+from schemas import roles_schemas as roles_schemas
 from models.roles import Roles as roles_models
 from core.deps import get_session
-from services import roles as roles_service
+from services import roles_services as roles_service
 
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy.future import select

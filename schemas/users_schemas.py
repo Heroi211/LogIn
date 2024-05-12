@@ -1,7 +1,7 @@
 from pydantic import BaseModel as SC_BaseModel
 from typing import Optional
 from pydantic import EmailStr
-from datetime import date
+from datetime import datetime
 
 
 class users(SC_BaseModel):
@@ -9,14 +9,15 @@ class users(SC_BaseModel):
     name: str
     email:EmailStr
     CPF: str
-    created_at:Optional[date] = date.today()
+    created_at:Optional[datetime] = datetime.now()
     active:Optional[bool] = True
-    role_id: int
+    role_id: Optional[int] = 1
     class Config:
-        orm_mode = True
+        from_attributes = True
+        
 
 class users_update(users):
-    name:Optional[str] = None 
+    name:Optional[str] = None
     email:Optional[EmailStr] = None
     CPF: Optional[str] = None
     password:Optional[str] = None

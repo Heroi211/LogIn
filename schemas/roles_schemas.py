@@ -8,9 +8,9 @@ class role(SC_basemodel):
     active:bool
     
     class Config:
-        orm_mode = True
+        from_attributes = True
         
 class role_update(role):
-    description:Optional[str]
-    active:Optional[bool]
+    description:Optional[str] = None
+    active:Optional[bool] = None
     

@@ -1,0 +1,12 @@
+Após a criação dos arquivos de imagem.
+1 - buildar 
+docker build -f nomedoarquivo -t nomeimagem:tag
+docker build -f db.dockerfile -t database_login:v1 .
+docker build -f webapp.dockerfile -t webapp_login:v1 .
+
+subir o container de banco primeiro.
+docker run --name "nomecontainer" -d nomeimagem:tag 
+docker run --name "database_login" -d database_login:v1 
+docker run --name "webapp_login"  -p portahost:portacontainer -d webapp_login:v1
+
+ 
