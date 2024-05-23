@@ -36,7 +36,7 @@ async def login(form_data:OAuth2PasswordRequestForm = Depends(),db:AsyncSession 
 
 #GET Logged
 @router.get('/logged', response_model=users_schemas.users)
-def get_logged(user_logged :users_models = Depends(get_current_user)):
+async def get_logged(user_logged :users_models = Depends(get_current_user)):
     return user_logged
 
 #GET users
@@ -47,9 +47,12 @@ async def get_users(db:AsyncSession = Depends(get_session),user_logged :users_mo
             users:List[users_schemas.users] = await users_service.select_all_users(db)
             return users
         else:
+            raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED)
+    except HTTPException as e:
+        if e.status_code != status.HTTP_401_UNAUTHORIZED:
+            raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail="Ocorreu um erro durante a solicitação.")
+        else:
             raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED,detail="Você não possui permissão para consultar esses dados.")
-    except HTTPException:
-        raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail="Ocorreu um erro durante a solicitação.")
     
 #GET user
 @router.get('/{id_user}',response_model=users_schemas.users,status_code=status.HTTP_202_ACCEPTED)
@@ -60,11 +63,16 @@ async def get_user(id_user : int, db:AsyncSession = Depends(get_session),user_lo
             if user:
                 return user
             else:
-                raise HTTPException(status_code=status.HTTP_404_NOT_FOUND,detail='Usuário não encontrado.')
+                raise HTTPException(status_code=status.HTTP_404_NOT_FOUND)
         else:
+            raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED)
+    except HTTPException as e:
+        if e.status_code == status.HTTP_404_NOT_FOUND:
+            raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Usuário não encontrado.")
+        elif e.status_code == status.HTTP_401_UNAUTHORIZED:
             raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED,detail="Você não possui permissão para consultar esses dados.")
-    except HTTPException:
-        raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST,detail="Ocorreu um erro durante a solicitação.")
+        else:
+            raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST,detail="Ocorreu um erro durante a solicitação.")
 
 #PUT user
 @router.put('/{id_user}',response_model=users_schemas.users,status_code=status.HTTP_202_ACCEPTED)
@@ -74,11 +82,13 @@ async def put_user(id_user:int,user:users_schemas.users_update, db:AsyncSession 
             user_update:users_schemas.users = await users_service.update_user(id_user,user,db)
             return user_update
         else:
+            raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED)
+    except HTTPException as e:
+        if e.status_code != status.HTTP_401_UNAUTHORIZED:
+            raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail="Ocorreu um erro durante a solicitação.")
+        else:
             raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED,detail="Você não possui permissão para consultar esses dados.")
-    except HTTPException:
-        raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST,detail="Ocorreu um erro durante a solicitação.")
     
-
 #DELETE user
 @router.delete('/{id_user}',status_code=status.HTTP_204_NO_CONTENT)
 async def delete_user(id_user,db:AsyncSession = Depends(get_session),user_logged :users_models = Depends(get_current_user)):
@@ -87,8 +97,10 @@ async def delete_user(id_user,db:AsyncSession = Depends(get_session),user_logged
             await users_service.drop_user(id_user,db)
             return Response (status_code=status.HTTP_204_NO_CONTENT)
         else:
+            raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED)
+    except HTTPException as e:
+        if e.status_code != status.HTTP_401_UNAUTHORIZED:
+            raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail="Ocorreu um erro durante a solicitação.")
+        else:
             raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED,detail="Você não possui permissão para consultar esses dados.")
-    except HTTPException:
-        raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST,detail='Ocorreu um erro durante a solicitação.')
-   
 

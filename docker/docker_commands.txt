@@ -1,0 +1,53 @@
+docker --version
+#Exibe a versão docker
+
+docker container ls
+#Lista todos os containeres
+
+docker ps 
+#Mostra todos os containeres
+
+docker ps -a
+#Mostra todos os containers ativos ou não
+
+docker run "nome container"
+#Executa o container
+
+docker container start "hash do container"
+#Starta o container
+
+docker pull "nomeimagem"
+#Faz download da imagem no docker hub
+
+docker image ls
+#Lista todas as imagens
+
+docker image rm "hash"
+#deleta a imagem 
+
+docker image tag "nome:version" "nome_dado"
+#cria uma imagem a partir de uma ja existente 
+
+docker run "nome_imagem:version"
+#cria um container a partir da imagem
+
+docker run "nome_imagem:version" echo "mensagem amigavel"
+#cria um container a partir da imagem, e printa a "mensagem amigavel no terminal"
+
+docker run --name "nome_escolhido" --rm -i -t tag:version sh
+#Cria um container, especifica um nome e habilita o shell bash dentro do container
+
+docker run -v "/var/host.txt" --name "nome_escolhido" --rm -i -t tag:version sh
+# -v cria o volume
+
+docker exec -it servidor_web sh
+#abre o shell do container
+
+docker container stop "hash"
+#para o container
+
+docker run --name "servidor_nginx" -d -p 8000:80 -e NGINX_ENTRYPOINT_QUIET_LOGS=1 -v "C:\Users\Gabri\Documents\Volume_TEste:/usr/share/Volume_teste_container" nginx:1.19.4-alpine
+#montando um volume
+
+docker inspect container
+#inspecionando container
