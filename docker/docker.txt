@@ -3,10 +3,57 @@ Após a criação dos arquivos de imagem.
 docker build -f nomedoarquivo -t nomeimagem:tag
 docker build -f db.dockerfile -t database_login:v1 .
 docker build -f webapp.dockerfile -t webapp_login:v1 .
+docker build -f C:\Repositorio\LogIn\docker\db.dockerfile -t postgresql:v1 C:\Repositorio\LogIn\docker
 
 subir o container de banco primeiro.
-docker run --name "nomecontainer" -d nomeimagem:tag 
+-> docker run --name "nomecontainer" -d nomeimagem:tag 
+
 docker run --name "database_login" -d database_login:v1 
+docker run -p 5432:5432 -v /tmp/database:/var/lib/postgresql/data -e ENV -d postgres
 docker run --name "webapp_login"  -p portahost:portacontainer -d webapp_login:v1
 
+
+2 - Fazendo pelo docker compose
+docker-compose up --build
+
+______________________________________________________
  
+_______________________________________________
+psql -h <hostname> -p <port> -U <username> -d <database>
+Acessar banco de dados linha de comando dentro do container
+
+________________________________________________
+
+docker build -f C:\Repositorio\LogIn\docker\db.dockerfile -t postgresql:v1 C:\Repositorio\LogIn\docker
+
+docker run -p 5432:5432 -v /tmp/database:/var/lib/postgresql/data -e POSTGRES_PASSWORD=1234 -d postgres
+________________________________________________
+
+deploy aws.
+1º criar um par de chaves de acesso, no perfil em My security credencials, copiar a region tambem.
+
+2º Na raiz do projeto "aws configure"
+informar a chave gerada.
+informar o secret gerado.
+informar a region.
+informar o formato (JSON)
+
+3º vai ser necessário utilizar o dockermachine 
+
+docker-machine --version
+
+4º gerar a EC2 na AWS.
+docker-machine create --driver amazonec2  --amazonec2-region "region_copiada" nome_ec2
+
+5º Gerar as envs para conectar o docker-engine na ec2 criada
+docker-machine env nome_ec2
+
+6º conectar ao ec2
+eval $(docker-machine env fusion)
+
+7º liberar a porta 80 que foi exposta para a publicação.
+acessar o EC2 e ir em grupos de segurança.
+seecionar o grupo do dockermachine.
+
+8º por fim, rodar o build.
+docker-compose up -d --build.

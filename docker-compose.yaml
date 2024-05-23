@@ -8,9 +8,12 @@ services:
     image: login_database:v1
     container_name: database_login
     ports:
-      - "5432"
+      - 5432:5432
     networks:
       - nwlogin
+    volumes:
+      - pgdata:/var/lib/postgresql/data/
+      - ./init_db:/docker-entrypoint-initdb.d/
 
   api_login:
     build:
@@ -30,3 +33,5 @@ networks:
   nwlogin:
     name: "nwlogin"
     driver: "bridge"
+volumes:
+  pgdata:
