@@ -1,6 +1,6 @@
 from starlette.middleware.base import BaseHTTPMiddleware
 from starlette.requests import Request
-from fastapi import HTTPException, status
+from fastapi import status
 from starlette.responses import JSONResponse
 
 class ValidateRequestBodyMiddleware(BaseHTTPMiddleware):
