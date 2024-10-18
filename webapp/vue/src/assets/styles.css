@@ -1,0 +1,38 @@
+html, body {
+    height: 100%;
+    margin: 0;
+    padding: 0;
+    overflow: hidden; /* Remove a barra de rolagem */
+  }
+  
+  body {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    background: linear-gradient(to bottom, rgb(65, 112, 65) 50%, rgba(156, 197, 156, 0.3) 100%); /* Fundo verde escuro desbotando */
+  }
+  
+  .login-container {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    height: 100%;
+    background: transparent; /* Fundo transparente */
+    width: 300px;
+  }
+  
+  .user-photo {
+    width: 100px;
+    height: 100px;
+    border-radius: 50%;
+    background-color: rgba(176, 184, 177, 0.8);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    margin-bottom: 20px;
+  }
+  
+  .user-photo i {
+    font-size: 50px;
+    color: #007bff;
+  }
