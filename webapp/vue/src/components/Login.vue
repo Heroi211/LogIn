@@ -1,10 +1,11 @@
 <template>
-  <div class="login-container">
-    <form @submit.prevent="login" class="bg-light p-4 rounded shadow" style="width: 300px;">
+  <div class="full-page">
+    <div class="login-container">
+    <form @submit.prevent="login" class="bg-light p-4 rounded shadow login-form">
       <div class="user-photo mb-3 mx-auto">
-        <i class="fas fa-user"></i>
+        <img :src="userPhoto" alt="User Photo" class="user-photo-img" />
       </div>
-      <h2 class="text-center mb-4">LOGin</h2>
+      <h2 class="text-center mb-4">Login</h2>
       <div class="form-group mb-3">
         <label for="username" class="form-label">
           <i class="fas fa-user"></i> Username
@@ -23,16 +24,19 @@
       </div>
     </form>
   </div>
+  </div>
 </template>
 
 <script>
+import userPhoto from '@/assets/Favicons/Android.png';
 import axios from 'axios';
 
 export default {
   data() {
     return {
       username: '',
-      password: ''
+      password: '',
+      userPhoto: userPhoto
     };
   },
   methods: {
@@ -65,4 +69,3 @@ export default {
   }
 };
 </script>
-

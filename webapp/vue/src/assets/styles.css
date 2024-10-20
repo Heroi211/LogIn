@@ -1,24 +1,35 @@
-html, body {
+
+  .container {
+    width: 100%;
+    height: 100%;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+  }
+
+  .login-container {
+    width: 100%;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    height: 100%;
+    background: transparent; 
+  }
+  
+  html {
     height: 100%;
     margin: 0;
     padding: 0;
-    overflow: hidden; /* Remove a barra de rolagem */
+    overflow: hidden; 
+    width: 100%;
   }
   
   body {
     display: flex;
     justify-content: center;
     align-items: center;
-    background: linear-gradient(to bottom, rgb(65, 112, 65) 50%, rgba(156, 197, 156, 0.3) 100%); /* Fundo verde escuro desbotando */
-  }
-  
-  .login-container {
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    height: 100%;
-    background: transparent; /* Fundo transparente */
-    width: 300px;
+    background: linear-gradient(to bottom, rgb(55, 59, 55) 50%, rgba(156, 197, 156, 0.3) 100%); 
+   
   }
   
   .user-photo {
@@ -30,9 +41,64 @@ html, body {
     justify-content: center;
     align-items: center;
     margin-bottom: 20px;
+    overflow: hidden; 
   }
   
-  .user-photo i {
-    font-size: 50px;
-    color: #007bff;
+  .user-photo-img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    border-radius: 50%; 
+  }
+
+  .footer {
+    background-color: transparent; /* Fundo transparente */
+    color: #fff;
+    padding: 20px 0;
+    text-align: center;
+    width: 100%;
+    position: absolute; /* Remova a posição absoluta */
+  }
+
+  .navbar {
+    background-color: #333;
+    padding: 1rem 0;
+    margin-bottom: 1rem;
+    width: 100%;
+    text-align: center;
+  }
+
+  .navbar-list {
+    list-style: none;
+    display: flex;
+    justify-content: space-around;
+    margin: 0;
+    padding: 0;
+  }
+
+  .navbar-item a {
+    color: white;
+    text-decoration: none;
+    font-size: 1.2rem;
+  }
+
+  .navbar-item a:hover {
+    text-decoration: underline;
+  }
+
+  #app {
+    font-family: Avenir, Helvetica, Arial, sans-serif;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+    text-align: center;
+    color: #2c3e50;
+    margin-top: 60px;
+  }
+  .content {
+    flex: 1;
+  }
+
+  main {
+    padding: 20px;
+    text-align: center;
   }
