@@ -21,11 +21,13 @@ class users_update(users):
     email:Optional[EmailStr] = None
     CPF: Optional[str] = None
     password:Optional[str] = None
+    phone:Optional[str] = None
     active:Optional[bool] = True
     role_id:Optional[int] = None
 
 class users_create(users):
     password:str
+    phone:str
     
     
     

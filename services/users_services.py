@@ -14,7 +14,7 @@ async def login_user(CPF:str,password:str,db:AsyncSession):
     
 async def register_user(user:users_schemas.users_create,db:AsyncSession) -> users_models: 
     new_user:users_models=users_models(name =user.name,email=user.email,
-                                       CPF=user.CPF,password=get_password_hash(user.password))
+                                       CPF=user.CPF,phone=user.phone,password=get_password_hash(user.password))
     async with db as session:
             session.add(new_user)
             await session.commit()
@@ -50,7 +50,9 @@ async def update_user(id_user:int,user:users_schemas.users_update,db:AsyncSessio
             if user_up.active != user.active:
                 user_up.active = user.active
             if user.password:
-                user_up.password = get_password_hash(user.password),
+                user_up.password = get_password_hash(user.password)
+            if user.phone:
+                user_up.phone = user.phone
             if user.role_id:
                 user_up.role_id = user.role_id
             

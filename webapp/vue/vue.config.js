@@ -9,5 +9,14 @@ module.exports = {
         __VUE_PROD_HYDRATION_MISMATCH_DETAILS__: false
       })
     ]
+  },
+  devServer: {
+    proxy: {
+      '/v1': {
+        target: 'http://localhost:8000',
+        changeOrigin: true
+      }
+    }
   }
 };
+

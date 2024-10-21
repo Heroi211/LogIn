@@ -1,11 +1,11 @@
 <template>
-  <div id="app">
-    <Navbar v-if="$route.name !== 'Login'" />
-    <div class="content">
-      <router-view />
-    </div>
-    <Footer />
-  </div>
+      <div id="app">
+        <Navbar v-if="!$route.meta.hideNavbar" />
+        <main>
+          <router-view />
+        </main>
+        <Footer/>
+      </div>
 </template>
 
 <script>
