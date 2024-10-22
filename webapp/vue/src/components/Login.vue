@@ -37,32 +37,37 @@ export default {
     return {
       username: '',
       password: '',
-      userPhoto: userPhoto
+      userPhoto: userPhoto // Mantendo a importação correta da imagem
     };
   },
   methods: {
     async login() {
+      const formData = new URLSearchParams();
+      formData.append('username', this.username);
+      formData.append('password', this.password);
+      
       try {
-        const response = await axios.post('http://localhost:8000/v1/users/login', {
-          username: this.username,
-          password: this.password
+        const response = await axios.post('http://localhost:8000/v1/users/login', formData, {
+          headers: {
+            'Content-Type': 'application/x-www-form-urlencoded'
+          }
         });
         const token = response.data.access_token;
         localStorage.setItem('token', token);
         alert('Login bem-sucedido!');
-        // Redirecionar para outra página, se necessário
+        this.$router.push('/home');
       } catch (error) {
-        alert('Erro no login: ' + error.response.data.detail);
+        alert('Erro no login: ');
+        console.log(error);
       }
     },
-    async goToSignup() {
-      try {
-        this.$router.push('/signup');
-        // Redirecionar para a página de login ou outra página, se necessário
-      } catch (error) {
-        alert('Erro no cadastro: ' + error.response.data.detail);
-      }
+    goToSignup() {
+      this.$router.push('/signup');
     }
   }
 };
 </script>
+
+<style scoped>
+/* Adicione seus estilos aqui */
+</style>
