@@ -1,7 +1,7 @@
 import { createRouter, createWebHistory } from 'vue-router';
-import Home from '../views/HomeView.vue';
-import Login from '../views/LoginView.vue';
-import Signup from '../views/SignupView.vue';
+import HomeView from '../views/HomeView.vue';
+import LoginView from '../views/LoginView.vue';
+import SignupView from '../views/SignupView.vue';
 
 const routes = [
   {
@@ -11,19 +11,19 @@ const routes = [
   {
     path: '/login',
     name: 'Login',
-    component: Login,
+    component: LoginView,
     meta: { requiresAuth: false, hideNavbar: true } 
   },
   {
     path: '/home',
     name: 'Home',
-    component: Home,
+    component: HomeView,
     meta: { requiresAuth: true }
   },
   {
     path: '/signup',
     name: 'Signup',
-    component: Signup,
+    component: SignupView,
     meta: { requiresAuth: false, hideNavbar: true }
   },
   // Outras rotas
