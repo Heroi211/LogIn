@@ -12,6 +12,8 @@ class users(SC_BaseModel):
     created_at:Optional[datetime] = datetime.now()
     active:Optional[bool] = True
     role_id: Optional[int] = 1
+    reset_password_token:Optional[str] = None
+    reset_password_expires:Optional[datetime] = None
     class Config:
         from_attributes = True
         
@@ -24,6 +26,8 @@ class users_update(users):
     phone:Optional[str] = None
     active:Optional[bool] = True
     role_id:Optional[int] = None
+    reset_password_token:Optional[str] = None
+    reset_password_expires:Optional[datetime] = None
 
 class users_create(users):
     password:str

@@ -15,6 +15,8 @@ class Users(settings.DB_BaseModel):
     created_at = Column(DateTime,default=datetime.datetime.now())
     role_id = Column(Integer,ForeignKey('roles.id'),default=1)
     active = Column(Boolean,default=True)
+    reset_password_token = Column(String(255),nullable=True)
+    reset_password_expires = Column(DateTime,nullable=True)
     
     #relação da FK pra apontar o relacionamento de role para usuario. 1xN
     role = relationship("Roles",lazy='joined')

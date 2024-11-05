@@ -22,7 +22,7 @@
         <button type="button" @click="goToSignup" class="btn btn-secondary ml-2">Signup</button>
       </div>
       <div class="d-flex justify-content-between">
-        <a href="/forgotPassword" class="forgot-password-link">Forgot Password?</a>
+        <a @click="goToForgotPassword" class="forgot-password-link">Esqueceu a senha?</a>
       </div>
     </form>
   </div>
@@ -47,7 +47,7 @@ export default {
       formData.append('password', this.password);
       
       try {
-        const response = await axios.post('http://localhost:8000/v1/users/login', formData, {
+        const response = await axios.post('/v1/users/login', formData, {
           headers: {
             'Content-Type': 'application/x-www-form-urlencoded'
           }
@@ -55,19 +55,18 @@ export default {
         const token = response.data.access_token;
         localStorage.setItem('token', token);
         alert('Login bem-sucedido!');
-        this.$router.push('/home');
+        this.$router.push('/Home');
       } catch (error) {
         alert('Erro no login: ');
         console.log(error);
       }
     },
     goToSignup() {
-      this.$router.push('/signup');
+      this.$router.push('/Signup');
+    },
+    goToForgotPassword() {
+      this.$router.push('/ForgotPassword');
     }
   }
 };
 </script>
-
-<style scoped>
-/* Adicione seus estilos aqui */
-</style>

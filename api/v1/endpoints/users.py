@@ -12,6 +12,7 @@ import datetime
 from services import users_services as users_service
 from sqlalchemy.exc import IntegrityError
 from core.auth import _generate_access_token
+from core.security import get_password_hash
 
 router = APIRouter()
 
@@ -104,3 +105,36 @@ async def delete_user(id_user,db:AsyncSession = Depends(get_session),user_logged
         else:
             raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED,detail="Você não possui permissão para consultar esses dados.")
 
+#Forgot Password - Send Email
+@router.post('/forgot-password',status_code=status.HTTP_200_OK)
+async def forgot_password(email:str,db:AsyncSession = Depends(get_session)):
+    try:
+        token = await users_service.generate_reset_token(email,db)
+        await users_service.send_email(email,token)
+        return {"message":"Email de redefinição de senha enviado!."}
+    except HTTPException as e:
+        if e.status_code != status.HTTP_401_UNAUTHORIZED:
+            raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail="Ocorreu um erro durante a solicitação.")
+        
+        else:
+            raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED,detail="Você não possui permissão para consultar esses dados.")
+        
+#Reset Password
+@router.post('/reset-password',status_code=status.HTTP_200_OK)
+async def reset_password(token: str, password: str, db: AsyncSession = Depends(get_session)):
+    try:
+        user:users_schemas.users_update = await users_service.get_user_by_reset_token(token, db)
+        if not user or user.reset_password_expires < datetime.datetime.now():
+            raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail="Token inválido ou expirado")
+        
+        user.password=get_password_hash(password)
+        user.reset_password_token = None
+        user.reset_password_expires = None
+        db.add(user)
+        await db.commit()
+        return {"message": "Senha redefinida com sucesso!"}
+    except HTTPException as e:
+        if e.status_code != status.HTTP_401_UNAUTHORIZED:
+            raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail="Ocorreu um erro durante a solicitação.")
+        else:
+            raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail="Você não possui permissão para consultar esses dados.")
