@@ -1,0 +1,83 @@
+from sqlalchemy import Column, Integer, String, Boolean, DateTime, ForeignKey
+from sqlalchemy.orm import relationship
+from core.generic import modelsGeneric
+
+# Classe de modelo de dados
+class Routines(modelsGeneric):
+    
+    STATUS_ABERTA = 0
+    STATUS_EXECUTANDO = 1
+    STATUS_CONCLUIDA = 2
+    STATUS_CANCELADA = 3
+    STATUS_VENCIDA = 4
+
+    STATUS_ROTINA = [
+        (STATUS_ABERTA, 'Aberta'),
+        (STATUS_EXECUTANDO, 'Executando'),
+        (STATUS_CONCLUIDA, 'Concluída'),
+        (STATUS_CANCELADA, 'Cancelada'),
+        (STATUS_VENCIDA, 'Vencida')
+    ]
+    
+    __tablename__ = 'routines'
+    
+    id = Column(Integer, autoincrement=True, primary_key=True)
+    titulo = Column(String(100), nullable=False)
+    descricao = Column(String(500), nullable=False)
+    is_completed = Column(Boolean, default=False, nullable=False)
+    dt_vencimento = Column(DateTime, nullable=True)
+    prioridade = Column(Integer, nullable=True)  # Usaremos um valor numérico para a prioridade: 1 (Alta), 2 (Média), 3 (Baixa)
+    users_id = Column(Integer, ForeignKey('users.id'))
+    clients_id = Column(Integer, ForeignKey('clients.id'))
+    hr_estimativa = Column(Integer, nullable=True)  # Campo opcional para horas estimadas
+    hr_real = Column(Integer, nullable=True)  # Campo opcional para horas reais
+    status = Column(Integer, nullable=False)  # Status pode representar diferentes estados, como "em andamento", "concluído", etc.
+
+    # Relações com outras tabelas
+    user = relationship('Users', lazy='joined')
+    client = relationship('Clients', lazy='joined')
+
+    # Métodos para manipulação de tarefas
+    def __init__(self, titulo, descricao, dt_vencimento=None, prioridade=3, hr_estimativa=0, hr_real=0, status=0):
+        self.titulo = titulo
+        self.descricao = descricao
+        self.is_completed = False
+        self.dt_vencimento = dt_vencimento
+        self.prioridade = prioridade
+        self.hr_estimativa = hr_estimativa
+        self.hr_real = hr_real
+        self.status = status
+
+    def complete_task(self):
+        """Marca a tarefa como concluída."""
+        self.is_completed = True
+        print(f"Tarefa '{self.titulo}' marcada como concluída.")
+
+    def __str__(self):
+        """Representação da tarefa em formato legível."""
+        status = "✓" if self.is_completed else "✗"
+        priority_str = {1: "Alta", 2: "Média", 3: "Baixa"}.get(self.prioridade, "Baixa")
+        due_date_str = self.dt_vencimento.strftime('%Y-%m-%d') if self.dt_vencimento else "Sem prazo"
+        return f"{status} {self.titulo} [Prioridade: {priority_str}] - Due: {due_date_str}"
+
+    # Classe para manipulação da lista de tarefas
+    class TodoList:
+        def __init__(self):
+            self.tasks = []
+
+        def add_task(self, task):
+            """Adiciona uma nova tarefa à lista."""
+            self.tasks.append(task)
+            print(f"Tarefa '{task.titulo}' adicionada com sucesso.")
+
+        def remove_task(self, title):
+            """Remove uma tarefa da lista pelo título."""
+            self.tasks = [task for task in self.tasks if task.titulo != title]
+            print(f"Tarefa '{title}' removida.")
+
+        def list_tasks(self, order_by_priority=False):
+            """Lista todas as tarefas, opcionalmente ordenadas por prioridade."""
+            tasks = sorted(self.tasks, key=lambda task: task.prioridade) if order_by_priority else self.tasks
+            for task in tasks:
+                print(task)
+

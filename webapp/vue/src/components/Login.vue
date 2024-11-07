@@ -57,8 +57,16 @@ export default {
         alert('Login bem-sucedido!');
         this.$router.push('/Home');
       } catch (error) {
-        alert('Erro no login: ');
-        console.log(error);
+        console.log(error.response.data.detail);
+        if (error.response && error.response.status === 400) {
+          if (error.response.data.detail === 'Dados incorretos') {
+            alert('Senha incorreta. Por favor, tente novamente.');
+          } else {
+            alert('Erro no login: ' + error.response.data.detail);
+          }
+        } else {
+          alert('Erro no login: ' + error.message.detail);
+        }
       }
     },
     goToSignup() {

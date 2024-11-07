@@ -1,9 +1,13 @@
 import { createRouter, createWebHistory } from 'vue-router';
+import ClientsView from '../views/ClientsView.vue';
 import ForgotPasswordView from '../views/ForgotPasswordView.vue';
 import HomeView from '../views/HomeView.vue';
 import LoginView from '../views/LoginView.vue';
 import ResetPasswordView from '../views/ResetPasswordView.vue';
+import RoutinesView from '../views/RoutinesView.vue';
 import SignupView from '../views/SignupView.vue';
+import UsersView from '../views/UsersView.vue';
+
 
 
 const routes = [
@@ -40,6 +44,24 @@ const routes = [
     name: 'ResetPassword',
     component: ResetPasswordView,
     meta: { requiresAuth: false, hideNavbar: true }
+  },
+  {
+    path: '/routines',
+    name: 'Routines',
+    component: RoutinesView,
+    meta: { requiresAuth: true, hideNavbar: false }
+  },
+  {
+    path: '/users',
+    name: 'Users',
+    component: UsersView,
+    meta: { requiresAuth: true, hideNavbar: false }
+  },
+  {
+    path: '/clients',
+    name: 'Clients',
+    component: ClientsView,
+    meta: { requiresAuth: true, hideNavbar: false }
   },
   // Outras rotas
 ];
