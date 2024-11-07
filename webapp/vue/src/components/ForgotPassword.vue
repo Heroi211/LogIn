@@ -1,13 +1,13 @@
 <template>
-  <div class="forgot-password-container">
+  <div class="forgot-password-container" style="color: white;">
     <div class="forgot-password-box">
       <h1>Olá,</h1>
-      <h3>Informe seu e-mail</h3> 
+      <h3>Informe seu e-mail</h3>
       <h3>Redefinir sua senha</h3>
       <form @submit.prevent="submitEmail">
         <input type="email" v-model="email" placeholder="Digite seu e-mail" required />
-        <div class="d-flex justify-content-end">
-          <button type="submit" class="btn btn-primary ml-2">Enviar</button>
+        <div class="d-flex justify-content-center">
+          <button type="submit" class="btn btn-primary">Enviar</button>
           <button type="button" @click="goToBack" class="btn btn-secondary ml-2">Voltar</button>
         </div>
       </form>

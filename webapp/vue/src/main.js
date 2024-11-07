@@ -1,3 +1,4 @@
+import 'devextreme/dist/css/dx.light.css';
 import 'bootstrap-vue/dist/bootstrap-vue.css';
 import 'bootstrap/dist/css/bootstrap.min.css';
 import { createApp } from 'vue';

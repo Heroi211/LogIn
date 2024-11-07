@@ -17,12 +17,12 @@
         </label>
         <input type="password" id="password" v-model="password" class="form-control" required />
       </div>
-      <div class="d-flex justify-content-end mb-3">
-        <button type="submit" class="btn btn-primary ml-2">Login</button>
+      <div class="d-flex justify-content-center mb-3">
+        <button type="submit" class="btn btn-primary">Login</button>
         <button type="button" @click="goToSignup" class="btn btn-secondary ml-2">Signup</button>
       </div>
-      <div class="d-flex justify-content-between">
-        <a @click="goToForgotPassword" class="forgot-password-link">Esqueceu a senha?</a>
+      <div class="d-flex justify-content-center">
+        <a @click="goToForgotPassword" class="forgot-password-link mr-0">Esqueceu a senha?</a>
       </div>
     </form>
   </div>
@@ -45,7 +45,7 @@ export default {
       const formData = new URLSearchParams();
       formData.append('username', this.username);
       formData.append('password', this.password);
-      
+
       try {
         const response = await axios.post('/v1/users/login', formData, {
           headers: {

@@ -32,17 +32,17 @@
           </label>
           <input type="password" id="password" v-model="password" class="form-control" required />
         </div>
-        <div class="d-flex justify-content-end">
-          <button type="submit" class="btn btn-primary ml-2">Cadastrar</button>
+        <div class="d-flex justify-content-center">
+          <button type="submit" class="btn btn-primary">Cadastrar</button>
           <button type="button" @click="goBack" class="btn btn-secondary ml-2">Voltar</button>
         </div>
       </form>
     </div>
   </template>
-  
+
   <script>
   import axios from 'axios';
-  
+
   export default {
     data() {
       return {
