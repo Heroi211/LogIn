@@ -12,12 +12,24 @@
     "bootstrap-vue": "^2.23.1",
     "devextreme": "24.1.4",
     "devextreme-vue": "24.1.4",
+    "lodash": "^4.17.21",
     "vue": "^3.0.0",
     "vue-router": "^4.4.5"
   },
   "devDependencies": {
+    "@babel/core": "^7.26.0",
+    "@babel/preset-env": "^7.26.0",
+    "@vue/cli-plugin-babel": "^5.0.8",
     "@vue/cli-service": "^4.5.0",
+    "@vue/compiler-sfc": "^3.5.12",
+    "babel-loader": "^9.2.1",
+    "css-loader": "^7.1.2",
     "devextreme-themebuilder": "24.1.4",
-    "vue-cli-plugin-vuetify": "~2.5.8"
+    "style-loader": "^4.0.0",
+    "vue-cli-plugin-vuetify": "~2.5.8",
+    "vue-loader": "^16.8.3",
+    "vue-template-compiler": "^2.7.16",
+    "webpack": "^5.96.1",
+    "webpack-cli": "^4.10.0"
   }
 }
