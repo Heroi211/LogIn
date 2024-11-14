@@ -1,15 +1,16 @@
 <template>
-  <div id="app">
-    <Navbar v-if="!$route.meta.hideNavbar" />
-    <main style="padding: 0; height: 100%;">
+  <v-app>
+    <v-app-bar app color="#074293" dark extension-height="64">
+      <AppNav />
+    </v-app-bar>
+    <v-main style="margin-top: 1%;">
       <router-view />
-    </main>
-    <Footer />
-  </div>
+    </v-main>
+    <AppFooter />
+  </v-app>
 </template>
 
-<script>
-export default {
-  name: 'App'
-};
+<script setup>
+import AppFooter from "@/components/AppFooter.vue";
+import AppNav from '@/components/AppNav.vue';
 </script>

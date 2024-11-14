@@ -1,12 +1,6 @@
-import { createRouter, createWebHistory } from 'vue-router';
-import ForgotPasswordView from '../views/ForgotPasswordView.vue';
-import HomeView from '../views/HomeView.vue';
-import LoginView from '../views/LoginView.vue';
-import ResetPasswordView from '../views/ResetPasswordView.vue';
-import SignupView from '../views/SignupView.vue';
-import RoutinesView from '../views/RoutinesView.vue';
-import UsersView from '../views/UsersView.vue';
-import ClientsView from '../views/ClientsView.vue';
+import { createRouter, createWebHistory } from 'vue-router/auto'
+import Login from '@/pages/Login.vue';
+import Routines from '@/pages/Routines.vue';
 
 const routes = [
   {
@@ -16,60 +10,59 @@ const routes = [
   {
     path: '/login',
     name: 'Login',
-    component: LoginView,
+    component: Login,
     meta: { requiresAuth: false, hideNavbar: true }
   },
-  {
-    path: '/home',
-    name: 'Home',
-    component: HomeView,
-    meta: { requiresAuth: true }
-  },
-  {
-    path: '/signup',
-    name: 'Signup',
-    component: SignupView,
-    meta: { requiresAuth: false, hideNavbar: true }
-  },
-  {
-    path: '/forgotpassword',
-    name: 'ForgotPassword',
-    component: ForgotPasswordView,
-    meta: { requiresAuth: false, hideNavbar: true }
-  },
-  {
-    path: '/resetpassword',
-    name: 'ResetPassword',
-    component: ResetPasswordView,
-    meta: { requiresAuth: false, hideNavbar: true }
-  },
+  // {
+  //   path: '/home',
+  //   name: 'Home',
+  //   component: HomeView,
+  //   meta: { requiresAuth: true }
+  // },
+  // {
+  //   path: '/signup',
+  //   name: 'Signup',
+  //   component: SignupView,
+  //   meta: { requiresAuth: false, hideNavbar: true }
+  // },
+  // {
+  //   path: '/forgotpassword',
+  //   name: 'ForgotPassword',
+  //   component: ForgotPasswordView,
+  //   meta: { requiresAuth: false, hideNavbar: true }
+  // },
+  // {
+  //   path: '/resetpassword',
+  //   name: 'ResetPassword',
+  //   component: ResetPasswordView,
+  //   meta: { requiresAuth: false, hideNavbar: true }
+  // },
   {
     path: '/routines',
     name: 'Routines',
-    component: RoutinesView,
+    component: Routines,
     meta: { requiresAuth: true, hideNavbar: false }
   },
-  {
-    path: '/users',
-    name: 'Users',
-    component: UsersView,
-    meta: { requiresAuth: true, hideNavbar: false }
-  },
-  {
-    path: '/clients',
-    name: 'Clients',
-    component: ClientsView,
-    meta: { requiresAuth: true, hideNavbar: false }
-  },
+  // {
+  //   path: '/users',
+  //   name: 'Users',
+  //   component: UsersView,
+  //   meta: { requiresAuth: true, hideNavbar: false }
+  // },
+  // {
+  //   path: '/clients',
+  //   name: 'Clients',
+  //   component: ClientsView,
+  //   meta: { requiresAuth: true, hideNavbar: false }
+  // },
   // Outras rotas
 ];
 
 const router = createRouter({
   history: createWebHistory(import.meta.env.BASE_URL),
-  routes
-});
+  routes: routes,
+})
 
-// Middleware de autenticação
 router.beforeEach((to, from, next) => {
   const isAuthenticated = !!localStorage.getItem('token');
   if (to.meta.requiresAuth && !isAuthenticated) {
@@ -79,4 +72,4 @@ router.beforeEach((to, from, next) => {
   }
 });
 
-export default router;
+export default router
