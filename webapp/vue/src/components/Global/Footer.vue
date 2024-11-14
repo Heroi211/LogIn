@@ -1,9 +1,5 @@
 <template>
-    <footer class="footer" style="color: white;">
-        <div class="container">
-            <p>&copy; {{ currentYear }} Cod3bit. All rights reserved.</p>
-        </div>
-    </footer>
+    <v-footer>{{ currentYear }} Cod3bit. All rights reserved.</v-footer>
 </template>
 
 <script>

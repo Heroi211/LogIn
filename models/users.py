@@ -9,7 +9,7 @@ class Users(modelsGeneric):
     name = Column(String(50),nullable=False)
     email = Column(String(50),nullable=False)
     phone = Column(String(12),nullable=False)
-    CPF = Column(String(12), unique=True,nullable=False)
+    cpf = Column(String(12), unique=True,nullable=False)
     role_id = Column(Integer,ForeignKey('roles.id'),default=1)
     reset_password_token = Column(String(255),nullable=True)
     reset_password_expires = Column(DateTime,nullable=True)

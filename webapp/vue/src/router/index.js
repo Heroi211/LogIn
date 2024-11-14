@@ -1,14 +1,12 @@
 import { createRouter, createWebHistory } from 'vue-router';
-import ClientsView from '../views/ClientsView.vue';
 import ForgotPasswordView from '../views/ForgotPasswordView.vue';
 import HomeView from '../views/HomeView.vue';
 import LoginView from '../views/LoginView.vue';
 import ResetPasswordView from '../views/ResetPasswordView.vue';
-import RoutinesView from '../views/RoutinesView.vue';
 import SignupView from '../views/SignupView.vue';
+import RoutinesView from '../views/RoutinesView.vue';
 import UsersView from '../views/UsersView.vue';
-
-
+import ClientsView from '../views/ClientsView.vue';
 
 const routes = [
   {
@@ -19,7 +17,7 @@ const routes = [
     path: '/login',
     name: 'Login',
     component: LoginView,
-    meta: { requiresAuth: false, hideNavbar: true } 
+    meta: { requiresAuth: false, hideNavbar: true }
   },
   {
     path: '/home',
@@ -67,7 +65,7 @@ const routes = [
 ];
 
 const router = createRouter({
-  history: createWebHistory(process.env.BASE_URL),
+  history: createWebHistory(import.meta.env.BASE_URL),
   routes
 });
 

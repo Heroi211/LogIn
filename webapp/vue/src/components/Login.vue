@@ -30,7 +30,7 @@
 
 <script>
 import userPhoto from '@/assets/Favicons/Android.png';
-import axios from 'axios';
+import axios from '@/axiosConfig';
 
 export default {
   data() {
@@ -57,16 +57,8 @@ export default {
         alert('Login bem-sucedido!');
         this.$router.push('/Home');
       } catch (error) {
-        console.log(error.response.data.detail);
-        if (error.response && error.response.status === 400) {
-          if (error.response.data.detail === 'Dados incorretos') {
-            alert('Senha incorreta. Por favor, tente novamente.');
-          } else {
-            alert('Erro no login: ' + error.response.data.detail);
-          }
-        } else {
-          alert('Erro no login: ' + error.message.detail);
-        }
+        alert('Erro no login: ');
+        console.log(error);
       }
     },
     goToSignup() {
