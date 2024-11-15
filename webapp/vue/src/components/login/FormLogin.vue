@@ -28,10 +28,10 @@
 </template>
 
 <script>
-import { defineComponent, ref } from "vue";
 import apiService from "@/services/ApiService";
-import { useRouter } from "vue-router";
 import { useAppStore } from "@/stores/app";
+import { defineComponent, ref } from "vue";
+import { useRouter } from "vue-router";
 
 export default defineComponent({
   name: "FormLogin",
@@ -48,14 +48,14 @@ export default defineComponent({
     function handleLogin() {
       overlay.value = true;
       apiService
-        .login(login, password)
+        .login(login.value, password.value)
         .then((response) => {
           localStorage.setItem("token", response.acessToken);
           appStore.setAuthenticated(true);
           overlay.value = false;
-          router.push("/home");
+          router.push("/routines");
         })
-        .cath(() => {
+        .catch(() => {
           overlay.value = false;
           visivel.value = true;
           setTimeout(() => {
