@@ -24,7 +24,7 @@ router = APIRouter()
 
 #POST routine
 @router.post('/',status_code=status.HTTP_201_CREATED,response_model=routines_schemas.routines)
-async def post_role(routine:routines_schemas.routines,db:AsyncSession = Depends(get_session),user_logged :users_models = Depends(get_current_user)):
+async def post_routine(routine:routines_schemas.routines,db:AsyncSession = Depends(get_session),user_logged :users_models = Depends(get_current_user)):
     try:
         if user_logged:
             new_routine:routines_models = await routines_service.register_routines(routine,db)
