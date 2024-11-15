@@ -55,7 +55,7 @@ export default defineComponent({
           overlay.value = false;
           router.push("/home");
         })
-        .cath(() => {
+        .catch(() => {
           overlay.value = false;
           visivel.value = true;
           setTimeout(() => {

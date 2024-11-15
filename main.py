@@ -10,7 +10,7 @@ app.include_router(api.router,prefix=settings.PROJECT_VERSION)
 
 # Configuração do CORS
 origins = [
-    "http://localhost:8080",  # Adicione outras origens conforme necessário
+    "*",  # Adicione outras origens conforme necessário
 ]
 
 app.add_middleware(

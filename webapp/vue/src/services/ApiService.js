@@ -7,9 +7,15 @@ const api = axios.create({
 const ApiService = {
   login: async (usuario, senha) => {
     const response = await api.post("/users/login", {
-      username: matricula,
+      username: usuario,
       password: senha,
-    });
+    },
+    {
+      headers: {
+        "Content-Type": "application/x-www-form-urlencoded"
+      }
+    }
+  );
     return response.data;
   },
 };
