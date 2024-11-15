@@ -34,6 +34,18 @@ class routinesUpdate(routines):
     hr_estimativa: Optional[int] = None
     hr_real: Optional[int] = None
     status: Optional[int] = None
+    
+class routines_all(routines):
+    titulo: Optional[str] = None
+    descricao: Optional[str] = None
+    is_completed: Optional[bool] = None
+    dt_vencimento: Optional[datetime] = None
+    prioridade: Optional[str] = None
+    user: Optional[str] = None
+    client: Optional[str] = None
+    hr_estimativa: Optional[int] = None
+    hr_real: Optional[int] = None
+    status: Optional[str] = None
 
 
     

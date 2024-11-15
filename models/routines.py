@@ -5,11 +5,11 @@ from core.generic import modelsGeneric
 # Classe de modelo de dados
 class Routines(modelsGeneric):
     
-    STATUS_ABERTA = 0
-    STATUS_EXECUTANDO = 1
-    STATUS_CONCLUIDA = 2
-    STATUS_CANCELADA = 3
-    STATUS_VENCIDA = 4
+    STATUS_ABERTA = 1
+    STATUS_EXECUTANDO = 2
+    STATUS_CONCLUIDA = 3
+    STATUS_CANCELADA = 4
+    STATUS_VENCIDA = 5
 
     STATUS_ROTINA = [
         (STATUS_ABERTA, 'Aberta'), # Nenhum usuário atribuido
@@ -17,6 +17,16 @@ class Routines(modelsGeneric):
         (STATUS_CONCLUIDA, 'Concluída'), # Concluída
         (STATUS_CANCELADA, 'Cancelada'), # Cancelada pelo cliente
         (STATUS_VENCIDA, 'Vencida') # SLA estourado
+    ]
+    
+    BAIXA = 1
+    NORMAL = 2
+    ALTA = 3 
+    
+    PRIORIDADE_ROUTINE = [
+        (BAIXA, 'Baixa'), # Nenhum usuário atribuido
+        (NORMAL, 'Normal'), # Usuário atribuido 
+        (ALTA, 'Alta'), # Concluída
     ]
     
     __tablename__ = 'routines'
@@ -52,6 +62,14 @@ class Routines(modelsGeneric):
         """Marca a tarefa como concluída."""
         self.is_completed = True
         print(f"Tarefa '{self.titulo}' marcada como concluída.")
+        
+    def get_status_display(self):
+        """Retorna o status da tarefa."""
+        return self.STATUS_ROTINA[self.status][1]
+    
+    def get_priority_display(self):
+        """Retorna a prioridade da tarefa."""
+        return self.PRIORIDADE_ROUTINE[self.prioridade][1]
 
     def __str__(self):
         """Representação da tarefa em formato legível."""
