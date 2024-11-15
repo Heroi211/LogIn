@@ -6,13 +6,15 @@ from core.generic import modelsGeneric
 class Clients(modelsGeneric):
     __tablename__ = 'clients'
     id = Column(Integer,autoincrement=True,primary_key=True)
-    CNPJ = Column(String(14),nullable=False)
+    cnpj = Column(String(14),nullable=False)
     razao_social = Column(String(50),nullable=False)
     email = Column(String(50),nullable=False)
     phone = Column(String(12),nullable=False)
- 
-    def __init__(self,CNPJ,razao_social,email,phone):
-        self.CNPJ = CNPJ
+    
+    routine = relationship('Routines', lazy='joined',back_populates="client")
+    
+    def __init__(self,cnpj,razao_social,email,phone):
+        self.cnpj = cnpj
         self.razao_social = razao_social
         self.email = email
         self.phone = phone

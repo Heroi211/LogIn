@@ -1,22 +1,28 @@
-from schemas import roles_schemas as roles_schemas
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy.future import select
 from typing import List
 from models.routines import Routines as routines_models
 from schemas import routines_schemas as routines_schemas
+from services.utils import to_utc
 
 async def register_routines(routine:routines_schemas.routines,db:AsyncSession) -> routines_models : 
     
-    async with db as session:    
-        task = routines_models(titulo=routine.titulo,descricao=routine.descricao,
-                                   dt_vencimento=routine.dt_vencimento,prioridade=routine.prioridade,
-                                   users_id=routine.users_id,clients_id=routine.clients_id,
-                                   hr_estimativa=routine.hr_estimativa,hr_real=routine.hr_real,
-                                   status=routine.status)
-        session.add(task)
+    async with db as session:  
+        if routine.users_id or routine.clients_id:  
+            new_routine = routines_models(titulo=routine.titulo,descricao=routine.descricao,
+                                    dt_vencimento=to_utc(routine.dt_vencimento),prioridade=routine.prioridade,
+                                    users_id=routine.users_id,clients_id=routine.clients_id,
+                                    hr_estimativa=routine.hr_estimativa,
+                                    status=routine.status)
+        else:
+            new_routine = routines_models(titulo=routine.titulo,descricao=routine.descricao,
+                                dt_vencimento=to_utc(routine.dt_vencimento),prioridade=routine.prioridade,
+                                hr_estimativa=routine.hr_estimativa,
+                                status=routine.status)
+        session.add(new_routine)
         await session.commit()
-        await session.refresh(task)
-        return task
+        await session.refresh(new_routine)
+        return new_routine
 
 async def select_all_routines(db:AsyncSession) -> List[routines_schemas.routines]:
     async with db as session:
@@ -50,7 +56,7 @@ async def update_routine(id_routine:int,routine:routines_schemas.routinesUpdate,
     async with db as session:
         querie = select(routines_models).filter(routines_models.id==id_routine, routines_models.active == True)
         resultset = await session.execute(querie)
-        routine_up:routines_models = resultset.scalars().unique().first()
+        routine_up:routines_models = resultset.scalars().unique().one_or_none()
         
         if routine_up:
             if routine.titulo:
@@ -72,7 +78,6 @@ async def update_routine(id_routine:int,routine:routines_schemas.routinesUpdate,
             if routine.status:
                 routine_up.status = routine.status
             await session.commit()
-            await session.refresh(routine)
             return routine
         return None
     
