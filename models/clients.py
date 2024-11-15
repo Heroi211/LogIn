@@ -12,6 +12,7 @@ class Clients(modelsGeneric):
     phone = Column(String(12),nullable=False)
     
     routine = relationship('Routines', lazy='joined',back_populates="client")
+    user_clients = relationship("Users_Clients", back_populates="client")
     
     def __init__(self,cnpj,razao_social,email,phone):
         self.cnpj = cnpj

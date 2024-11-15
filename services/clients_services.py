@@ -1,7 +1,9 @@
 from models.clients import Clients as clients_models
+from models.routines import Routines as routines_models
 from schemas import clients_schemas as clients_schemas
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy.future import select
+from sqlalchemy import func
 
 
 async def register_clients(client:clients_schemas.clients,db:AsyncSession) -> clients_models:
@@ -14,12 +16,30 @@ async def register_clients(client:clients_schemas.clients,db:AsyncSession) -> cl
         await session.refresh(new_client)
         return new_client
 
-async def select_all_clients(db:AsyncSession) -> clients_schemas.clients:
+async def select_all_clients(db:AsyncSession) -> clients_schemas.clientsGetData:
     async with db as session:
         querie = select(clients_models).filter(clients_models.active == True)
         resultset = await session.execute(querie)
         clients:clients_schemas.clients = resultset.scalars().unique().all()    
-        return clients
+        
+        clients_list = []
+        
+        for client in clients:
+            querie = select(func.count(routines_models.id)).filter(routines_models.clients_id == client.id,routines_models.active == True)
+            resultset = await session.execute(querie)
+            count = resultset.scalar()
+            clients_list.append(
+                {
+                "id": client.id,
+                "cnpj": client.cnpj,
+                "razao_social": client.razao_social,
+                "email": client.email,
+                "phone": client.phone,
+                "tarefas": count
+                }
+            )
+        
+        return clients_list
 
 async def select_client(id_client:int, db:AsyncSession) -> clients_schemas.clients:
     async with db as session:

@@ -18,3 +18,11 @@ class clientsUpdate(clients):
     razao_social: Optional[str] = None
     email: Optional[EmailStr] = None
     phone: Optional[str] = None
+    
+class clientsGetData(clients):
+    cnpj: Optional[str] = None
+    razao_social: Optional[str] = None
+    email: Optional[EmailStr] = None
+    phone: Optional[str] = None
+    tarefas: Optional[int] = None
+    

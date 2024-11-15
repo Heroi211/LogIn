@@ -21,11 +21,11 @@ async def post_client(client: clients_schemas.clients,db:AsyncSession = Depends(
         raise HTTPException(status_code=status.HTTP_406_NOT_ACCEPTABLE,detail="Usuário já cadastrado na base de dados")
 
 #GET Clients
-@router.get('/',status_code=status.HTTP_200_OK,response_model=List[clients_schemas.clients])
+@router.get('/',status_code=status.HTTP_200_OK,response_model=List[clients_schemas.clientsGetData])
 async def get_clients(db:AsyncSession = Depends(get_session),user_logged :users_models = Depends(get_current_user)):
     try:
         if user_logged:
-            clients:List[clients_schemas.clients] = await clients_service.select_all_clients(db)
+            clients:List[clients_schemas.clientsGetData] = await clients_service.select_all_clients(db)
             return clients
         else:
                 raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED)

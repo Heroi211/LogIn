@@ -28,14 +28,14 @@ async def register_user(user:users_schemas.users_create,db:AsyncSession) -> user
 
 async def select_all_users(db:AsyncSession) -> List[users_schemas.users]:
     async with db as session:
-        querie = select(users_models).order_by(users_models.id.asc())
+        querie = select(users_models).order_by(users_models.id.asc()).filter(users_models.active==True)
         resultset = await session.execute(querie)
         users:List[users_schemas.users] = resultset.scalars().unique().all()
         return users
     
 async def select_user(id_user:int,db:AsyncSession) -> users_schemas.users:
     async with db as session:
-        querie = select(users_models).filter(users_models.id==id_user)
+        querie = select(users_models).filter(users_models.id==id_user,users_models.active==True)
         resultset = await session.execute(querie)
         user = resultset.scalars().unique().one_or_none()
         
@@ -43,7 +43,7 @@ async def select_user(id_user:int,db:AsyncSession) -> users_schemas.users:
 
 async def update_user(id_user:int,user:users_schemas.users_update,db:AsyncSession) -> users_schemas.users:
     async with db as session:
-        querie = select(users_models).filter(users_models.id == id_user)
+        querie = select(users_models).filter(users_models.id == id_user,users_models.active==True)
         resultset = await session.execute(querie)
         user_up:users_schemas.users = resultset.scalars().unique().one_or_none()
         
@@ -66,16 +66,18 @@ async def update_user(id_user:int,user:users_schemas.users_update,db:AsyncSessio
     
 async def drop_user(id_user:int, db:AsyncSession):
     async with db as session:
-        querie = select(users_models).filter(users_models.id==int(id_user))
+        querie = select(users_models).filter(users_models.id==int(id_user),users_models.active==True)
         result_set = await session.execute(querie)
         user_delete:users_schemas.users = result_set.scalars().unique().one_or_none()
         if user_delete:
-            await session.delete(user_delete)
+            user_delete.active = False
             await session.commit()
+            await session.refresh(user_delete)
+            return user_delete
             
 async def get_user_by_email(email:str,db:AsyncSession):
     async with db as session:
-        querie = select(users_models).filter(users_models.email==email)
+        querie = select(users_models).filter(users_models.email==email,users_models.active==True)
         resultset = await session.execute(querie)
         user_up:users_schemas.users = resultset.scalars().unique().one_or_none()
         if user_up:
@@ -104,7 +106,7 @@ async def send_email(email: str,token:str):
     message["From"] = f"Cod3Bit Dev Team <{sender_email}>"
     message["To"] = receiver_email
     
-    reset_link = f"http://127.0.0.1:8080/resetpassword?email={email}&token={token}"
+    reset_link = f"http://127.0.0.1:3000/resetpassword?email={email}&token={token}"
     text = f"""\
     Olá,
     Recebemos uma solicitação para redefinir sua senha. Clique no link abaixo para redefinir sua senha:
@@ -131,7 +133,7 @@ async def send_email(email: str,token:str):
     
 async def get_user_by_reset_token(token: str, db: AsyncSession):
     async with db as session:
-        query = select(users_models).filter(users_models.reset_password_token == token)
+        query = select(users_models).filter(users_models.reset_password_token == token,users_models.active==True)
         resultset = await session.execute(query)
         user_up: users_schemas.users_update = resultset.scalars().unique().one_or_none()
         if user_up:

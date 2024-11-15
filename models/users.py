@@ -20,6 +20,7 @@ class Users(modelsGeneric):
     
     # Relação reversa para rotinas
     routine = relationship("Routines", back_populates="user")
+    user_clients = relationship("Users_Clients", back_populates="user")
     
     
  

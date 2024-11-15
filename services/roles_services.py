@@ -18,7 +18,7 @@ async def register_role(role:roles_schemas.role,db:AsyncSession) -> roles_models
 
 async def select_all_roles(db:AsyncSession) -> List[roles_schemas.role]:
     async with db as session:
-        querie = select(roles_models)
+        querie = select(roles_models).filter(roles_models.active == True)
         resultset = await session.execute(querie)
         roles:List[roles_schemas.role] = resultset.scalars().unique().all()
         return roles
@@ -26,14 +26,14 @@ async def select_all_roles(db:AsyncSession) -> List[roles_schemas.role]:
         
 async def select_role(id_role:int,db:AsyncSession) -> roles_schemas.role:
     async with db as session:
-        querie = select(roles_models).filter(roles_models.id == id_role)
+        querie = select(roles_models).filter(roles_models.id == id_role,roles_models.active==True)
         resultset = await session.execute(querie)
         role:roles_schemas.role = resultset.scalars().unique().one_or_none()
         return role
 
 async def update_role(id_role:int,role:roles_schemas.role_update,db:AsyncSession):
     async with db as session:
-        querie = select(roles_models).filter(roles_models.id == id_role)
+        querie = select(roles_models).filter(roles_models.id == id_role,roles_models.active==True)
         resultset = await session.execute(querie)
         role_update:roles_schemas.role = resultset.scalars().unique().one_or_none()
         
@@ -46,11 +46,15 @@ async def update_role(id_role:int,role:roles_schemas.role_update,db:AsyncSession
 
 async def drop_role(id_role:int,db:AsyncSession):
     async with db as session:
-        querie = select(roles_models).filter(roles_models.id == id_role)
+        querie = select(roles_models).filter(roles_models.id == id_role,roles_models.active==True)
         resultset = await session.execute(querie)
         role_del:roles_schemas.role = resultset.scalars().unique().one_or_none()
-        await session.delete(role_del)
-        await session.commit()
+        
+        if role_del:
+            role_del.active = False
+            await session.commit()
+            await session.refresh(role_del)
+            return role_del
             
 
     
