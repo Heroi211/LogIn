@@ -12,11 +12,11 @@ class Routines(modelsGeneric):
     STATUS_VENCIDA = 4
 
     STATUS_ROTINA = [
-        (STATUS_ABERTA, 'Aberta'),
-        (STATUS_EXECUTANDO, 'Executando'),
-        (STATUS_CONCLUIDA, 'Concluída'),
-        (STATUS_CANCELADA, 'Cancelada'),
-        (STATUS_VENCIDA, 'Vencida')
+        (STATUS_ABERTA, 'Aberta'), # Nenhum usuário atribuido
+        (STATUS_EXECUTANDO, 'Executando'), # Usuário atribuido 
+        (STATUS_CONCLUIDA, 'Concluída'), # Concluída
+        (STATUS_CANCELADA, 'Cancelada'), # Cancelada pelo cliente
+        (STATUS_VENCIDA, 'Vencida') # SLA estourado
     ]
     
     __tablename__ = 'routines'
@@ -34,8 +34,8 @@ class Routines(modelsGeneric):
     status = Column(Integer, nullable=False)  # Status pode representar diferentes estados, como "em andamento", "concluído", etc.
 
     # Relações com outras tabelas
-    user = relationship('Users', lazy='joined')
-    client = relationship('Clients', lazy='joined')
+    user = relationship('Users',back_populates="routine")
+    client = relationship('Clients',back_populates="routine")
 
     # Métodos para manipulação de tarefas
     def __init__(self, titulo, descricao, dt_vencimento=None, prioridade=3, hr_estimativa=0, hr_real=0, status=0):

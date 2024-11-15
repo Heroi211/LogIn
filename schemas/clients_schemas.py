@@ -4,7 +4,7 @@ from datetime import datetime
 
 class clients(BaseModel):
     id: Optional[int] = None
-    CNPJ: str
+    cnpj: str
     razao_social: str
     email: EmailStr
     phone: str
@@ -14,7 +14,7 @@ class clients(BaseModel):
 
 
 class clientsUpdate(clients):
-    CNPJ: Optional[str] = None
+    cnpj: Optional[str] = None
     razao_social: Optional[str] = None
     email: Optional[EmailStr] = None
     phone: Optional[str] = None

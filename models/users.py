@@ -15,8 +15,11 @@ class Users(modelsGeneric):
     reset_password_expires = Column(DateTime,nullable=True)
  
     
-    #relação da FK pra apontar o relacionamento de role para usuario. 1xN
-    role = relationship("Roles",lazy='joined')
+    #relação da FK pra apontar o relacionamento de role para usuario
+    role = relationship("Roles",lazy='joined',back_populates='user')
+    
+    # Relação reversa para rotinas
+    routine = relationship("Routines", back_populates="user")
     
     
  
