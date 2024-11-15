@@ -33,11 +33,11 @@ async def post_routine(routine:routines_schemas.routines,db:AsyncSession = Depen
     
 
 #GET routines
-@router.get('/',status_code=status.HTTP_200_OK,response_model=List[routines_schemas.routines])
+@router.get('/',status_code=status.HTTP_200_OK,response_model=List[routines_schemas.routines_all])
 async def get_routines(db:AsyncSession = Depends(get_session),user_logged :users_models = Depends(get_current_user)):
     try:
         if user_logged:
-            routines:List[routines_schemas.routines] = await routines_service.select_all_routines(db)
+            routines:List[routines_schemas.routines_all] = await routines_service.select_all_routines(db)
             return routines
         else:
             raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED)

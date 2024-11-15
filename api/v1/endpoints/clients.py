@@ -35,32 +35,15 @@ async def get_clients(db:AsyncSession = Depends(get_session),user_logged :users_
         else:
             raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED,detail="Você não possui permissão para consultar esses dados.")
 
-#GET client by id
-@router.get('/{client_id}',status_code=status.HTTP_200_OK, response_model=clients_schemas.clients)
-async def get_client_by_id(client_id:int, db:AsyncSession = Depends(get_session),user_logged :users_models = Depends(get_current_user)):
+#GET client by key
+@router.get('/{key}',status_code=status.HTTP_200_OK, response_model=clients_schemas.clients)
+async def get_client_by_id(key:int, db:AsyncSession = Depends(get_session),user_logged :users_models = Depends(get_current_user)):
     try:
         if user_logged:
-            client:clients_schemas.clients = await clients_service.select_client(client_id,db)
-            if client:
-                return client
+            if len(str(key)) == 14:
+                client:clients_schemas.clients = await clients_service.select_client_by_cnpj(str(key),db)
             else:
-                raise HTTPException(status_code=status.HTTP_404_NOT_FOUND)
-        else:
-                    raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED)
-    except HTTPException as e:
-        if e.status_code == status.HTTP_400_BAD_REQUEST:
-            raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail="Ocorreu um erro durante a solicitação.")
-        elif e.status_code == status.HTTP_400_BAD_REQUEST:
-            raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED,detail="Você não possui permissão para consultar esses dados.")
-        else:
-            raise HTTPException(status_code=status.HTTP_404_NOT_FOUND,detail='cliente não encontrado.')
-
-#GET client by CNPJ
-@router.get('/{cnpj}',status_code=status.HTTP_200_OK, response_model=clients_schemas.clients)
-async def get_client_by_CNPJ(client_cnpj:int, db:AsyncSession = Depends(get_session),user_logged :users_models = Depends(get_current_user)):
-    try:
-        if user_logged:
-            client:clients_schemas.clients = await clients_service.select_client_by_cnpj(client_cnpj,db)
+                client:clients_schemas.clients = await clients_service.select_client(key,db)
             if client:
                 return client
             else:
@@ -76,8 +59,8 @@ async def get_client_by_CNPJ(client_cnpj:int, db:AsyncSession = Depends(get_sess
             raise HTTPException(status_code=status.HTTP_404_NOT_FOUND,detail='cliente não encontrado.')
 
 #PUT client
-@router.put('/',status_code=status.HTTP_202_ACCEPTED,response_model=clients_schemas.clients)
-async def put_client(client_id: Optional[int], client:clients_schemas.clientsUpdate,db:AsyncSession = Depends(get_session),user_logged :users_models = Depends(get_current_user)):
+@router.put('/{client_id}',status_code=status.HTTP_202_ACCEPTED,response_model=clients_schemas.clients)
+async def put_client(client_id: int, client:clients_schemas.clientsUpdate,db:AsyncSession = Depends(get_session),user_logged :users_models = Depends(get_current_user)):
     try:
         if user_logged:
             client_update:clients_schemas.clientsUpdate = await clients_service.update_client(client_id,client,db)
@@ -94,7 +77,7 @@ async def put_client(client_id: Optional[int], client:clients_schemas.clientsUpd
     
 
 #DELETE role
-@router.delete('/',status_code=status.HTTP_202_ACCEPTED)
+@router.delete('/{client_id}',status_code=status.HTTP_202_ACCEPTED)
 async def delete_role(client_id:int,db:AsyncSession= Depends(get_session),user_logged :users_models = Depends(get_current_user)):
     try:
         if user_logged:

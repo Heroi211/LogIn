@@ -14,37 +14,37 @@ async def register_clients(client:clients_schemas.clients,db:AsyncSession) -> cl
         await session.refresh(new_client)
         return new_client
 
-async def select_all_clients(db:AsyncSession) -> clients_models:
+async def select_all_clients(db:AsyncSession) -> clients_schemas.clients:
     async with db as session:
         querie = select(clients_models).filter(clients_models.active == True)
         resultset = await session.execute(querie)
         clients:clients_schemas.clients = resultset.scalars().unique().all()    
         return clients
 
-async def select_client(id_client:int, db:AsyncSession) -> clients_models:
+async def select_client(id_client:int, db:AsyncSession) -> clients_schemas.clients:
     async with db as session:
-        querie = select(clients_models).filter(clients_models.active == True)
+        querie = select(clients_models).filter(clients_models.active == True, clients_models.id == id_client)
         resultset = await session.execute(querie)
         client:clients_schemas.clients = resultset.scalars().unique().first()
         return client
 
-async def select_client_by_cnpj(cnpj:str, db:AsyncSession) -> clients_models:
+async def select_client_by_cnpj(cnpj:str, db:AsyncSession) -> clients_schemas.clients:
     async with db as session:
-        querie = select(clients_models).filter(clients_models.cnpj==cnpj,clients_models.active == True)
+        querie = select(clients_models).filter(clients_models.active == True, clients_models.cnpj==cnpj)
         resultset = await session.execute(querie)
-        client:clients_schemas.clients = resultset.scalars().unique.all()
+        client:clients_schemas.clients = resultset.scalars().unique().first()
         return client
 
-async def select_client_by_email(email:str, db:AsyncSession) -> clients_models:
+async def select_client_by_email(email:str, db:AsyncSession) -> clients_schemas.clients:
     async with db as session:
         querie = select(clients_models).filter(clients_models.email==email,clients_models.active == True)
         resultset = await session.execute(querie)
-        client:clients_schemas.clients = resultset.scalars().unique().all()
+        client:clients_schemas.clients = resultset.scalars().unique().first()
         return client
 
-async def update_client(id_client:int,client:clients_schemas.clientsUpdate,db:AsyncSession) -> clients_models:
+async def update_client(id_client:int,client:clients_schemas.clientsUpdate,db:AsyncSession) -> clients_schemas.clients:
     async with db as session:
-        querie = select(clients_models).filter_by(id=id_client,active=True)
+        querie = select(clients_models).filter(clients_models.id==id_client,clients_models.active == True)
         resultset = await session.execute(querie)
         client_up:clients_models = resultset.scalars().unique().one_or_none()
         
@@ -59,10 +59,10 @@ async def update_client(id_client:int,client:clients_schemas.clientsUpdate,db:As
                 client_up.phone = client.phone
             await session.commit()
             await session.refresh(client_up)
-            return client_up
+            return client
         return None
 
-async def drop_client(id_client:int,db:AsyncSession) -> clients_models:
+async def drop_client(id_client:int,db:AsyncSession) -> clients_schemas.clients:
     async with db as session:
         querie = select(clients_models).filter_by(id=id_client,active=True)
         resultset = await session.execute(querie)

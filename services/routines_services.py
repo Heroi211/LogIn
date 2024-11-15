@@ -2,6 +2,8 @@ from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy.future import select
 from typing import List
 from models.routines import Routines as routines_models
+from models.clients import Clients as clients
+from models.users import Users as users
 from schemas import routines_schemas as routines_schemas
 from services.utils import to_utc
 
@@ -24,12 +26,33 @@ async def register_routines(routine:routines_schemas.routines,db:AsyncSession) -
         await session.refresh(new_routine)
         return new_routine
 
-async def select_all_routines(db:AsyncSession) -> List[routines_schemas.routines]:
+async def select_all_routines(db:AsyncSession) -> List[routines_schemas.routines_all]:
     async with db as session:
         querie = select(routines_models).filter(routines_models.active == True)
         resultset = await session.execute(querie)
-        routines:List[routines_schemas.routines] = resultset.scalars().unique().all()
-        return routines
+        routines = resultset.scalars().unique().all()
+        
+        routines_list = []
+        
+        for routine in routines:
+            client = await session.get(clients, routine.clients_id)
+            user = await session.get(users, routine.users_id)
+            routines_list
+            routines_list.append( 
+            {    "id": routine.id,
+                "titulo": routine.titulo,
+                "descricao": routine.descricao,
+                "status": routine.get_status_display(),
+                "hr_estimativa": routine.hr_estimativa,
+                "hr_real": routine.hr_real,
+                "user": user.name if user else None,
+                "client": client.razao_social if client else None,
+                "cliente_id": routine.clients_id,
+                "user_id": routine.users_id,
+                "prioridade": routine.get_priority_display(),
+                "dt_vencimento": routine.dt_vencimento}
+                )
+        return routines_list
     
 async def select_routine(id_routine:int,db:AsyncSession) -> routines_schemas.routines:
     async with db as session:
