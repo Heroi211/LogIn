@@ -30,7 +30,7 @@ export default defineComponent({
     const selected = ref([])
 
     function toggleSelect() {
-      showSelect.value = !showSelect.value;
+      showSelect = !showSelect;
     }
 
     function addRoutine() {

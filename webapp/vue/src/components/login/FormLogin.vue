@@ -28,10 +28,10 @@
 </template>
 
 <script>
-import apiService from "@/services/ApiService";
-import { useAppStore } from "@/stores/app";
 import { defineComponent, ref } from "vue";
+import apiService from "@/services/ApiService";
 import { useRouter } from "vue-router";
+import { useAppStore } from "@/stores/app";
 
 export default defineComponent({
   name: "FormLogin",
@@ -53,9 +53,9 @@ export default defineComponent({
           localStorage.setItem("token", response.acessToken);
           appStore.setAuthenticated(true);
           overlay.value = false;
-          router.push("/routines");
+          router.push("/home");
         })
-        .catch(() => {
+        .cath(() => {
           overlay.value = false;
           visivel.value = true;
           setTimeout(() => {
