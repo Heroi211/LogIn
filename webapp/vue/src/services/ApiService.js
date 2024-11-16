@@ -44,6 +44,14 @@ const ApiService = {
     });
     return response.data;
   },
+  forgotPassword: async (email) => {
+    const response = await api.post(`/users/forgot-password/${email}`)
+    return response.data
+  },
+  resetSenha: async(senha, token) => {
+    const response = await api.post(`/users/reset-password?password=${senha}&token=${token}`)
+    return response.data
+  }
 };
 
 export default ApiService;

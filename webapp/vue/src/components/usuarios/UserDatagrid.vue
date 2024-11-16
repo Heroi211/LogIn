@@ -1,5 +1,5 @@
 <template>
-  <v-data-table :loading="loading" :items.sync="clients" :headers="headers" hide-default-footer dense
+  <v-data-table :loading="loading" :items.sync="users" :headers="headers" hide-default-footer dense
     loading-text="Carregando..." no-data-text="Nenhum resultado encontrado"
     no-results-text="Nenhum resultado encontrado" class="elevation-1">
     <template v-slot:top>
@@ -75,6 +75,8 @@ export default defineComponent({
       { title: "Email", key: "email" },
       { title: "CPF", key: "cpf" },
       { title: "Ativo", key: "active"},
+      { title: "Telefone", key: "phone"},
+      { title: "Tarefas", key: "tarefas"},
       { title: "Actions", key: "actions" },
     ])
     const snackbar = ref({

@@ -3,6 +3,8 @@ import Login from '@/pages/Login.vue';
 import Routines from '@/pages/Routines.vue';
 import Clients from "@/pages/Clients.vue";
 import Users from '@/pages/Users.vue';
+import ForgotPassword from '@/pages/ForgotPassword.vue';
+import ResetPassword from '@/pages/ResetPassword.vue';
 
 const routes = [
   {
@@ -27,18 +29,18 @@ const routes = [
   //   component: SignupView,
   //   meta: { requiresAuth: false, hideNavbar: true }
   // },
-  // {
-  //   path: '/forgotpassword',
-  //   name: 'ForgotPassword',
-  //   component: ForgotPasswordView,
-  //   meta: { requiresAuth: false, hideNavbar: true }
-  // },
-  // {
-  //   path: '/resetpassword',
-  //   name: 'ResetPassword',
-  //   component: ResetPasswordView,
-  //   meta: { requiresAuth: false, hideNavbar: true }
-  // },
+  {
+    path: '/forgotpassword',
+    name: 'ForgotPassword',
+    component: ForgotPassword,
+    meta: { requiresAuth: false, hideNavbar: true }
+  },
+  {
+    path: '/resetpassword',
+    name: 'ResetPassword',
+    component: ResetPassword,
+    meta: { requiresAuth: false, hideNavbar: true }
+  },
   {
     path: '/routines',
     name: 'Routines',
