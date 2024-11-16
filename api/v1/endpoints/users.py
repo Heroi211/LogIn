@@ -106,7 +106,7 @@ async def delete_user(id_user,db:AsyncSession = Depends(get_session),user_logged
             raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED,detail="Você não possui permissão para consultar esses dados.")
 
 #Forgot Password - Send Email
-@router.post('/forgot-password',status_code=status.HTTP_200_OK)
+@router.post('/forgot-password/{email}',status_code=status.HTTP_200_OK)
 async def forgot_password(email:str,db:AsyncSession = Depends(get_session)):
     try:
         token = await users_service.generate_reset_token(email,db)
