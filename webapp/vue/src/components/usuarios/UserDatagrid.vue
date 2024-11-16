@@ -71,9 +71,10 @@ export default defineComponent({
     const dialogDelete = ref(false)
 
     const headers = ref([
-      { title: "CNPJ", key: "cnpj" },
-      { title: "Razão Social", key: "razao_social" },
-      { title: "Tarefas", key: "tarefas" },
+      { title: "Nome", key: "name" },
+      { title: "Email", key: "email" },
+      { title: "CPF", key: "cpf" },
+      { title: "Ativo", key: "active"},
       { title: "Actions", key: "actions" },
     ])
     const snackbar = ref({

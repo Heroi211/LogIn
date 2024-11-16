@@ -8,7 +8,7 @@ class users(SC_BaseModel):
     id:Optional[int] = None
     name: str
     email:EmailStr
-    CPF: str
+    cpf: str
     created_at:Optional[datetime] = datetime.now()
     active:Optional[bool] = True
     role_id: Optional[int] = 1
@@ -16,7 +16,7 @@ class users(SC_BaseModel):
     reset_password_expires:Optional[datetime] = None
     class Config:
         from_attributes = True
-        
+
 
 class users_update(users):
     name:Optional[str] = None
@@ -32,6 +32,5 @@ class users_update(users):
 class users_create(users):
     password:str
     phone:str
-    
-    
-    
+
+
