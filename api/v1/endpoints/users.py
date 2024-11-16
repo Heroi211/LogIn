@@ -44,7 +44,7 @@ async def get_logged(user_logged :users_models = Depends(get_current_user)):
 @router.get('/', response_model=List[users_schemas.users])
 async def get_users(db:AsyncSession = Depends(get_session),user_logged :users_models = Depends(get_current_user)):
     try:
-        if user_logged.role_id == 3:
+        if user_logged:
             users:List[users_schemas.users] = await users_service.select_all_users(db)
             return users
         else:
@@ -59,7 +59,7 @@ async def get_users(db:AsyncSession = Depends(get_session),user_logged :users_mo
 @router.get('/{id_user}',response_model=users_schemas.users,status_code=status.HTTP_202_ACCEPTED)
 async def get_user(id_user : int, db:AsyncSession = Depends(get_session),user_logged :users_models = Depends(get_current_user)):
     try:
-        if user_logged.role_id == 3:
+        if user_logged:
             user:users_schemas.users = await users_service.select_user(id_user,db)
             if user:
                 return user
@@ -79,7 +79,7 @@ async def get_user(id_user : int, db:AsyncSession = Depends(get_session),user_lo
 @router.put('/{id_user}',response_model=users_schemas.users,status_code=status.HTTP_202_ACCEPTED)
 async def put_user(id_user:int,user:users_schemas.users_update, db:AsyncSession = Depends(get_session),user_logged :users_models = Depends(get_current_user)): 
     try:
-        if user_logged.role_id == 3:
+        if user_logged:
             user_update:users_schemas.users = await users_service.update_user(id_user,user,db)
             return user_update
         else:
@@ -94,7 +94,7 @@ async def put_user(id_user:int,user:users_schemas.users_update, db:AsyncSession 
 @router.delete('/{id_user}',status_code=status.HTTP_204_NO_CONTENT)
 async def delete_user(id_user,db:AsyncSession = Depends(get_session),user_logged :users_models = Depends(get_current_user)):
     try:
-        if user_logged.role_id == 3:
+        if user_logged:
             await users_service.drop_user(id_user,db)
             return Response (status_code=status.HTTP_204_NO_CONTENT)
         else:
