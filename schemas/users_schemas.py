@@ -8,7 +8,7 @@ class users(SC_BaseModel):
     id:Optional[int] = None
     name: str
     email:EmailStr
-    CPF: str
+    cpf: str
     created_at:Optional[datetime] = datetime.now()
     active:Optional[bool] = True
     role_id: Optional[int] = 1
@@ -21,7 +21,7 @@ class users(SC_BaseModel):
 class users_update(users):
     name:Optional[str] = None
     email:Optional[EmailStr] = None
-    CPF: Optional[str] = None
+    cpf: Optional[str] = None
     password:Optional[str] = None
     phone:Optional[str] = None
     active:Optional[bool] = True
@@ -33,5 +33,15 @@ class users_create(users):
     password:str
     phone:str
     
+class usersGetData(users):
+    name:Optional[str] = None
+    email:Optional[EmailStr] = None
+    cpf: Optional[str] = None
+    phone:Optional[str] = None
+    active:Optional[bool] = True
+    role:Optional[str] = None
+    tarefas:Optional[int] = None
+
+
     
     

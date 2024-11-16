@@ -11,6 +11,9 @@ import secrets
 import smtplib
 from email.mime.multipart import MIMEMultipart
 from email.mime.text import MIMEText
+from sqlalchemy import func
+from models.routines import Routines as routines_models
+from models.roles import Roles as roles_models
 
 
 async def login_user(cpf:str,password:str,db:AsyncSession):
@@ -26,12 +29,38 @@ async def register_user(user:users_schemas.users_create,db:AsyncSession) -> user
             await session.refresh(new_user)
             return new_user
 
-async def select_all_users(db:AsyncSession) -> List[users_schemas.users]:
+async def select_all_users(db:AsyncSession) -> List[users_schemas.usersGetData]:
     async with db as session:
         querie = select(users_models).order_by(users_models.id.asc()).filter(users_models.active==True)
         resultset = await session.execute(querie)
-        users:List[users_schemas.users] = resultset.scalars().unique().all()
-        return users
+        users:List[users_schemas.usersGetData] = resultset.scalars().unique().all()
+        
+        users_list = []
+        for user in users:
+            querie = select(func.count(routines_models.id)).filter(routines_models.users_id == user.id,routines_models.active == True)
+            resultset = await session.execute(querie)
+            count = resultset.scalar()
+            
+            #role
+            role = select(roles_models).filter(roles_models.id == user.role_id,roles_models.active==True)
+            role = await session.execute(role)
+            role = role.scalars().unique().one_or_none()
+            
+            users_list.append(
+                {
+                    "id":user.id,
+                    "name":user.name,
+                    "email":user.email,
+                    "cpf":user.cpf,
+                    "phone":user.phone,
+                    "active":user.active,
+                    "role":role.get_roles(),
+                    "tarefas":count
+                }
+            )
+        
+        
+        return users_list
     
 async def select_user(id_user:int,db:AsyncSession) -> users_schemas.users:
     async with db as session:
