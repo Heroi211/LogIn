@@ -41,11 +41,11 @@ async def get_logged(user_logged :users_models = Depends(get_current_user)):
     return user_logged
 
 #GET users
-@router.get('/', response_model=List[users_schemas.users])
+@router.get('/', response_model=List[users_schemas.usersGetData],status_code=status.HTTP_202_ACCEPTED)
 async def get_users(db:AsyncSession = Depends(get_session),user_logged :users_models = Depends(get_current_user)):
     try:
         if user_logged:
-            users:List[users_schemas.users] = await users_service.select_all_users(db)
+            users:List[users_schemas.usersGetData] = await users_service.select_all_users(db)
             return users
         else:
             raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED)
