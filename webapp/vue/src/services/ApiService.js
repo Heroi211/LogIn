@@ -6,16 +6,42 @@ const api = axios.create({
 
 const ApiService = {
   login: async (usuario, senha) => {
-    const response = await api.post("/users/login", {
-      username: usuario,
-      password: senha,
-    },
-    {
-      headers: {
-        "Content-Type": "application/x-www-form-urlencoded"
+    const response = await api.post(
+      "/users/login",
+      {
+        username: usuario,
+        password: senha,
+      },
+      {
+        headers: {
+          "Content-Type": "application/x-www-form-urlencoded",
+        },
       }
-    }
-  );
+    );
+    return response.data;
+  },
+  getRoutines: async () => {
+    const response = await api.get("/routines", {
+      headers: {
+        Authorization: `bearer ${localStorage.getItem("token")}`,
+      },
+    })
+    return response.data;
+  },
+  getClients: async () => {
+    const response = await api.get("/clients", {
+      headers: {
+        Authorization: `bearer ${localStorage.getItem("token")}`,
+      },
+    });
+    return response.data;
+  },
+  getUsers: async () => {
+    const response = await api.get("/users", {
+      headers: {
+        Authorization: `bearer ${localStorage.getItem("token")}`,
+      },
+    });
     return response.data;
   },
 };

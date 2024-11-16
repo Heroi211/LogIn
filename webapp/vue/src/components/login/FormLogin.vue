@@ -50,7 +50,7 @@ export default defineComponent({
       apiService
         .login(login.value, password.value)
         .then((response) => {
-          localStorage.setItem("token", response.acessToken);
+          localStorage.setItem("token", response.access_token);
           appStore.setAuthenticated(true);
           overlay.value = false;
           router.push("/home");

@@ -1,6 +1,8 @@
 import { createRouter, createWebHistory } from 'vue-router/auto'
 import Login from '@/pages/Login.vue';
 import Routines from '@/pages/Routines.vue';
+import Clients from "@/pages/Clients.vue";
+import Users from '@/pages/Users.vue';
 
 const routes = [
   {
@@ -43,18 +45,18 @@ const routes = [
     component: Routines,
     meta: { requiresAuth: true, hideNavbar: false }
   },
-  // {
-  //   path: '/users',
-  //   name: 'Users',
-  //   component: UsersView,
-  //   meta: { requiresAuth: true, hideNavbar: false }
-  // },
-  // {
-  //   path: '/clients',
-  //   name: 'Clients',
-  //   component: ClientsView,
-  //   meta: { requiresAuth: true, hideNavbar: false }
-  // },
+  {
+    path: '/users',
+    name: 'Users',
+    component: Users,
+    meta: { requiresAuth: true, hideNavbar: false }
+  },
+  {
+    path: '/clients',
+    name: 'Clients',
+    component: Clients,
+    meta: { requiresAuth: true, hideNavbar: false }
+  },
   // Outras rotas
 ];
 
