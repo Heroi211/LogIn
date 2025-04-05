@@ -1,15 +1,16 @@
-import { createRouter, createWebHistory } from 'vue-router/auto'
-import Login from '@/pages/Login.vue';
-import Routines from '@/pages/Routines.vue';
 import Clients from "@/pages/Clients.vue";
-import Users from '@/pages/Users.vue';
 import ForgotPassword from '@/pages/ForgotPassword.vue';
+import Login from '@/pages/Login.vue';
 import ResetPassword from '@/pages/ResetPassword.vue';
+import Routines from '@/pages/Routines.vue';
+import Signup from '@/pages/Signup.vue';
+import Users from '@/pages/Users.vue';
+import { createRouter, createWebHistory } from 'vue-router/auto';
 
 const routes = [
   {
     path: '/',
-    redirect: '/login' // Redireciona a raiz para /login
+    redirect: '/home' // Redireciona a raiz para /home
   },
   {
     path: '/login',
@@ -23,12 +24,12 @@ const routes = [
   //   component: HomeView,
   //   meta: { requiresAuth: true }
   // },
-  // {
-  //   path: '/signup',
-  //   name: 'Signup',
-  //   component: SignupView,
-  //   meta: { requiresAuth: false, hideNavbar: true }
-  // },
+  {
+    path: '/signup',
+    name: 'Signup',
+    component: Signup,
+    meta: { requiresAuth: false, hideNavbar: true }
+  },
   {
     path: '/forgotpassword',
     name: 'ForgotPassword',

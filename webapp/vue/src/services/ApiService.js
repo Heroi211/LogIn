@@ -51,7 +51,17 @@ const ApiService = {
   resetSenha: async(senha, token) => {
     const response = await api.post(`/users/reset-password?password=${senha}&token=${token}`)
     return response.data
-  }
+  },
+  signup: async (userData) => {
+    const response = await api.post("/users/signup", {
+      name: userData.name,
+      password: userData.password,
+      email: userData.email,
+      phone: userData.phone,
+      cpf: userData.cpf,
+    });
+    return response.data;
+  },
 };
 
 export default ApiService;

@@ -18,7 +18,10 @@
         <v-btn color="primary" @click="handleLogin">CONFIRMAR</v-btn>
       </v-card-actions>
       <div class="d-flex justify-center">
-        <a @click="goToForgotPassword" class="forgot-password-link mr-0">Esqueceu a senha?</a>
+        <a @click="goToForgotPassword" class="forgot-password-link mr-0" style="cursor: pointer;">Esqueceu a senha?</a>
+      </div>
+      <div class="d-flex right justify-center mr-0">
+        <a @click="goToSignUp" class="signup-link mr-0" style="cursor: pointer;">Não tem uma conta?</a>
       </div>
     </v-card>
     <v-overlay :value="overlay">
@@ -28,10 +31,10 @@
 </template>
 
 <script>
-import { defineComponent, ref } from "vue";
 import apiService from "@/services/ApiService";
-import { useRouter } from "vue-router";
 import { useAppStore } from "@/stores/app";
+import { defineComponent, ref } from "vue";
+import { useRouter } from "vue-router";
 
 export default defineComponent({
   name: "FormLogin",
@@ -68,6 +71,10 @@ export default defineComponent({
       router.push('/ForgotPassword');
     }
 
+    function goToSignUp() {
+      router.push('/signup');
+    }
+
     return {
       dialog,
       overlay,
@@ -75,7 +82,8 @@ export default defineComponent({
       password,
       visivel,
       handleLogin,
-      goToForgotPassword
+      goToForgotPassword,
+      goToSignUp
     }
   }
 })
