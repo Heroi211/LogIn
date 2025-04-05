@@ -62,6 +62,20 @@ const ApiService = {
     });
     return response.data;
   },
+  salvarRotina: async (rotina) => {
+    const response = await api.post("/routines", {
+      titulo: rotina.titulo,
+      descricao: rotina.descricao,
+      dt_vencimento: rotina.dt_vencimento,
+      hr_estimativa: rotina.hr_estimativa,
+    }, {
+      headers: {
+        Authorization: `bearer ${localStorage.getItem("token")}`,
+      },
+    });
+    return response.data;
+
+  }
 };
 
 export default ApiService;

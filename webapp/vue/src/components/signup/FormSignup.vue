@@ -1,7 +1,6 @@
 <template>
     <div class="mx-5">
       <v-card class="elevation-1 mx-auto mt-10" max-width="600">
-        <!-- Alertas para feedback de erro ou sucesso -->
         <v-alert color="red" dismissible prominent type="error" v-if="errorVisible">
           Erro ao cadastrar usuário
         </v-alert>

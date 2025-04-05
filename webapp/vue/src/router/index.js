@@ -1,10 +1,12 @@
 import Clients from "@/pages/Clients.vue";
 import ForgotPassword from '@/pages/ForgotPassword.vue';
+import Home from '@/pages/Home.vue';
 import Login from '@/pages/Login.vue';
 import ResetPassword from '@/pages/ResetPassword.vue';
 import Routines from '@/pages/Routines.vue';
 import Signup from '@/pages/Signup.vue';
 import Users from '@/pages/Users.vue';
+
 import { createRouter, createWebHistory } from 'vue-router/auto';
 
 const routes = [
@@ -18,12 +20,12 @@ const routes = [
     component: Login,
     meta: { requiresAuth: false, hideNavbar: true }
   },
-  // {
-  //   path: '/home',
-  //   name: 'Home',
-  //   component: HomeView,
-  //   meta: { requiresAuth: true }
-  // },
+  {
+    path: '/home',
+    name: 'Home',
+    component: Home,
+    meta: { requiresAuth: true }
+  },
   {
     path: '/signup',
     name: 'Signup',

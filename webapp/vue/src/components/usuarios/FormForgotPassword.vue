@@ -13,7 +13,7 @@
         </v-form>
       </v-card-text>
       <v-card-actions class="justify-center">
-        <v-btn color="grey" outlined>Cancelar</v-btn>
+        <v-btn color="grey" outlined @click="cancelar">Cancelar</v-btn>
         <v-btn color="primary" @click="handleReset">CONFIRMAR</v-btn>
       </v-card-actions>
     </v-card>
@@ -26,6 +26,7 @@
 <script>
 import apiService from "@/services/ApiService";
 import { defineComponent, ref } from "vue";
+import { useRouter } from "vue-router";
 export default defineComponent({
   name: "FormForgotPassword",
   setup() {
@@ -33,6 +34,11 @@ export default defineComponent({
     const overlay = ref(false)
     const email = ref('')
     const visivelSuccess = ref(false)
+    const router = useRouter()
+
+    function cancelar() {
+      router.push('/login')
+    }
 
     function handleReset() {
       overlay.value = true;
@@ -56,7 +62,8 @@ export default defineComponent({
       overlay,
       email,
       visivelSuccess,
-      handleReset
+      handleReset,
+      cancelar
     }
 
   }

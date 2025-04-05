@@ -56,9 +56,9 @@
   </v-snackbar>
 </template>
 <script>
+import apiService from "@/services/ApiService";
 import { defineComponent, ref } from "vue";
 import RoutinesDialog from "./RoutinesDialog.vue";
-import apiService from "@/services/ApiService";
 
 export default defineComponent({
   name: "RoutinesDatagrid",
@@ -115,6 +115,10 @@ export default defineComponent({
       snackbar.value.color = color;
       snackbar.value.icon = icon;
     }
+
+    watch(dialog, async (newValue) => {
+     getRoutine()
+    });
 
     function getRoutine() {
       loading.value = true
