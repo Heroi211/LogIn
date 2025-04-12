@@ -65,11 +65,16 @@ class Routines(modelsGeneric):
         
     def get_status_display(self):
         """Retorna o status da tarefa."""
-        return self.STATUS_ROTINA[self.status][1]
+        for status_value, status_label in self.STATUS_ROTINA:
+            if self.status == status_value:
+                return status_label
+        return "Status inválido"
     
     def get_priority_display(self):
         """Retorna a prioridade da tarefa."""
-        return self.PRIORIDADE_ROUTINE[self.prioridade][1]
+        if 1 <= self.prioridade <= len(self.PRIORIDADE_ROUTINE):
+            return self.PRIORIDADE_ROUTINE[self.prioridade - 1][1]
+        return "Prioridade inválida"
 
     def __str__(self):
         """Representação da tarefa em formato legível."""

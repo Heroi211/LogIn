@@ -12,16 +12,16 @@
         <div class="collapse navbar-collapse" id="navbarSupportedContent">
           <ul class="navbar-nav me-auto mb-2 mb-lg-0">
             <li class="nav-item">
-              <router-link class="nav-link" to="/">Inicio</router-link>
+              <router-link class="nav-link text-white" to="/">Inicio</router-link>
             </li>
             <li class="nav-item">
-              <router-link class="nav-link" to="/routines">Rotinas</router-link>
+              <router-link class="nav-link text-white" to="/routines">Rotinas</router-link>
             </li>
             <li class="nav-item">
-              <router-link class="nav-link" to="/clients">Clientes</router-link>
+              <router-link class="nav-link text-white" to="/clients">Clientes</router-link>
             </li>
             <li class="nav-item">
-              <router-link class="nav-link" to="/users">Usuários</router-link>
+              <router-link class="nav-link text-white" to="/users">Usuários</router-link>
             </li>
           </ul>
           <router-link to="/login" @click.native="logout">Sair</router-link>

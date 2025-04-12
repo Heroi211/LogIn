@@ -1,20 +1,21 @@
+<!-- src/components/login/FormLogin.vue -->
 <template>
   <div class="mx-5">
     <v-card class="elevation-1 mx-auto mt-10" max-width="600">
-      <v-alert color="red" dismissible prominent type="error" v-if="visivel">Usuario ou senha invalidos</v-alert>
+      <v-alert color="red" dismissible prominent type="error" v-if="visivel">
+        Usuário ou senha inválidos
+      </v-alert>
       <v-toolbar dark color="primary">
         <v-toolbar-title>Faça Seu Login</v-toolbar-title>
       </v-toolbar>
       <v-card-text>
         <v-form>
-          <v-text-field v-model="login" prepend-icon="mdi-account" name="login" label="Digite seu usuario"
-            type="text" />
-          <v-text-field v-model="password" id="password" prepend-icon="mdi-lock" name="password"
-            label="Digite Sua Senha" type="password" />
+          <v-text-field v-model="login" prepend-icon="mdi-account" name="login" label="Digite seu usuário" type="text" />
+          <v-text-field v-model="password" id="password" prepend-icon="mdi-lock" name="password" label="Digite Sua Senha" type="password" />
         </v-form>
       </v-card-text>
       <v-card-actions class="justify-center">
-        <v-btn color="grey" outlined>Cancelar</v-btn>
+        <v-btn color="grey" outlined @click="cancelLogin">Cancelar</v-btn>
         <v-btn color="primary" @click="handleLogin">CONFIRMAR</v-btn>
       </v-card-actions>
       <div class="d-flex justify-center">
@@ -38,15 +39,20 @@ import { useRouter } from "vue-router";
 
 export default defineComponent({
   name: "FormLogin",
-  setup() {
-    const appStore = useAppStore()
-    const router = useRouter()
+  props: {
+    inModal: {
+      type: Boolean,
+      default: false,
+    },
+  },
+  setup(props) {
+    const appStore = useAppStore();
+    const router = useRouter();
 
-    const dialog = ref(true)
-    const overlay = ref(false)
-    const login = ref("")
-    const password = ref("")
-    const visivel = ref(false)
+    const overlay = ref(false);
+    const login = ref("");
+    const password = ref("");
+    const visivel = ref(false);
 
     function handleLogin() {
       overlay.value = true;
@@ -56,7 +62,13 @@ export default defineComponent({
           localStorage.setItem("token", response.access_token);
           appStore.setAuthenticated(true);
           overlay.value = false;
-          router.push("/home");
+          if (props.inModal) {
+            // Se estiver no modal, apenas fecha-o
+            appStore.closeLoginModal();
+          } else {
+            // Se estiver na página de login, redireciona para /home
+            router.push("/home");
+          }
         })
         .catch(() => {
           overlay.value = false;
@@ -64,7 +76,16 @@ export default defineComponent({
           setTimeout(() => {
             visivel.value = false;
           }, 3000);
-        })
+        });
+    }
+
+    function cancelLogin() {
+      if (props.inModal) {
+        // Se desejar permitir o cancelamento, pode fechar o modal
+        appStore.closeLoginModal();
+      } else {
+        // Redirecionamento ou outra lógica se estiver na página de login
+      }
     }
 
     function goToForgotPassword() {
@@ -76,15 +97,15 @@ export default defineComponent({
     }
 
     return {
-      dialog,
       overlay,
       login,
       password,
       visivel,
       handleLogin,
+      cancelLogin,
       goToForgotPassword,
-      goToSignUp
-    }
-  }
-})
+      goToSignUp,
+    };
+  },
+});
 </script>

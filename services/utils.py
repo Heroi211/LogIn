@@ -1,10 +1,10 @@
 import pytz
 from datetime import datetime
 
-def to_utc(dt:datetime) -> datetime:
-        if dt and dt.tzinfo:
-            return dt.astimezone(pytz.UTC).replace(tzinfo=None)
-        return dt
+def to_utc(dt: datetime) -> str:
+    if dt and dt.tzinfo:
+        dt = dt.astimezone(pytz.UTC).replace(tzinfo=None)
+    return dt.strftime("%d:%m:%Y %H:%M") if dt else None
 
 def utcnow() -> datetime:
     return datetime.now(pytz.UTC).replace(tzinfo=None)

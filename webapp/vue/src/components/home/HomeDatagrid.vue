@@ -23,7 +23,7 @@
   
       <v-row>
         <v-col cols="12">
-          <routines-datagrid />
+          <routines-datagrid :show-actions="false" />
         </v-col>
       </v-row>
     </v-container>

@@ -7,10 +7,12 @@
       <router-view />
     </v-main>
     <AppFooter />
+    <LoginModal />
   </v-app>
 </template>
 
 <script setup>
 import AppFooter from "@/components/AppFooter.vue";
 import AppNav from '@/components/AppNav.vue';
+import LoginModal from '@/components/login/ModalLogin.vue'; 
 </script>

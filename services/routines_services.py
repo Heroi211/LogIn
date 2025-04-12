@@ -49,7 +49,7 @@ async def select_all_routines(db:AsyncSession) -> List[routines_schemas.routines
                 "client": client.razao_social if client else None,
                 "cliente_id": routine.clients_id,
                 "user_id": routine.users_id,
-                # "prioridade": routine.get_priority_display(),
+                "prioridade": routine.get_priority_display(),
                 "dt_vencimento": routine.dt_vencimento}
                 )
         return routines_list
