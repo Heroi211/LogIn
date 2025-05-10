@@ -1,7 +1,7 @@
 <template>
-  <v-data-table :loading="loading" :items.sync="routines" :headers="computedHeaders" hide-default-footer dense
+  <v-data-table :loading="loading" :items="paginatedRoutines"  :row-props="rowProps"   :headers="computedHeaders" hide-default-footer dense
     no-data-text="Nenhum resultado encontrado" loading-text="Carregando..."
-    no-results-text="Nenhum resultado encontrado" class="elevation-1">
+    no-results-text="Nenhum resultado encontrado" class="elevation-1"  >
     
     <!-- Top Toolbar -->
     <template v-slot:top>
@@ -78,6 +78,14 @@
       </template>
     </template>
   </v-data-table>
+   <v-row justify="center" class="mt-4" v-if="pageCount > 1">
+    <v-pagination
+      v-model="page"
+      :length="pageCount"
+      total-visible="5"
+      color="primary"
+    />
+  </v-row>
   
   <v-snackbar v-model="snackbar.visible" multi-line :color="snackbar.color" :timeout="snackbar.timeout"
     :top="snackbar.position === 'top'" min-width="0" elevation="0" rounded="pill">
@@ -144,6 +152,24 @@ export default defineComponent({
       visible: false,
     });
 
+    const page         = ref(1);
+    const itemsPerPage = 9;
+
+    const pageCount = computed(() =>
+      Math.ceil(routines.value.length / itemsPerPage)
+    );
+
+    const paginatedRoutines = computed(() => {
+      const start = (page.value - 1) * itemsPerPage;
+      return routines.value.slice(start, start + itemsPerPage);
+    });
+
+    watch(routines, () => {
+    if (page.value > pageCount.value) {
+      page.value = pageCount.value || 1;
+    }
+    });
+
     function editItem(item) {
       selectedRoutineEdit.value = item;
       dialogEdit.value = true;
@@ -196,7 +222,9 @@ export default defineComponent({
       .then((resp) => {
         routines.value = resp.map((routine) => {
           if (routine.dt_vencimento) {
+            routine.dt_vencimento_raw = routine.dt_vencimento;
             routine.dt_vencimento = format(new Date(routine.dt_vencimento), "dd/MM/yyyy HH:mm");
+            console.log(routine.dt_vencimento_raw + 'cassete');
           }
           return routine;
         });
@@ -208,6 +236,18 @@ export default defineComponent({
       .finally(() => {
         loading.value = false;
       });
+    }
+
+    function rowProps({ item }) {
+      console.log(item);
+      if (!item.dt_vencimento_raw) return {};
+      const due   = new Date(item.dt_vencimento_raw);
+      const today = new Date();
+      return {
+        class: { 
+          "expired-row": due < today 
+        }
+      };
     }
     
     getRoutine();
@@ -225,7 +265,11 @@ export default defineComponent({
       notifyUser,
       snackbar,
       loading,
-      showActions: props.showActions 
+      showActions: props.showActions,
+      rowProps,
+      paginatedRoutines,
+      page,
+      pageCount,
     };
   },
 });

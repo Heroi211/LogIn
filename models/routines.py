@@ -78,7 +78,7 @@ class Routines(modelsGeneric):
     
     def set_inactive(self):
         """Marca a tarefa como inativa."""
-        self.is_active = False
+        self.active = False
         print(f"Tarefa '{self.titulo}' marcada como inativa.")
 
     def __str__(self):

@@ -6,10 +6,15 @@ from models.clients import Clients as clients
 from models.users import Users as users
 from schemas import routines_schemas as routines_schemas
 from services.utils import to_utc
+import datetime
 
 async def register_routines(routine:routines_schemas.routines,db:AsyncSession) -> routines_models : 
     
     async with db as session:  
+        
+        raw = routine.dt_vencimento
+        dt_utc = to_utc(raw)
+        
         if routine.users_id or routine.clients_id:  
             new_routine = routines_models(titulo=routine.titulo,descricao=routine.descricao,
                                     dt_vencimento=to_utc(routine.dt_vencimento),prioridade=routine.prioridade,
@@ -18,9 +23,9 @@ async def register_routines(routine:routines_schemas.routines,db:AsyncSession) -
                                     status=routine.status)
         else:
             new_routine = routines_models(titulo=routine.titulo,descricao=routine.descricao,
-                                dt_vencimento=to_utc(routine.dt_vencimento),prioridade=routine.prioridade,
+                                dt_vencimento=dt_utc,prioridade=routine.prioridade,
                                 hr_estimativa=routine.hr_estimativa,
-                                status=routine.status)
+                                status=routine.status)  
         session.add(new_routine)
         await session.commit()
         await session.refresh(new_routine)
