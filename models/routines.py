@@ -75,6 +75,11 @@ class Routines(modelsGeneric):
         if 1 <= self.prioridade <= len(self.PRIORIDADE_ROUTINE):
             return self.PRIORIDADE_ROUTINE[self.prioridade - 1][1]
         return "Prioridade inválida"
+    
+    def set_inactive(self):
+        """Marca a tarefa como inativa."""
+        self.is_active = False
+        print(f"Tarefa '{self.titulo}' marcada como inativa.")
 
     def __str__(self):
         """Representação da tarefa em formato legível."""

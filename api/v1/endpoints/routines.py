@@ -127,7 +127,7 @@ async def put_routines(routine_id:Optional[int], routine:routines_schemas.routin
 
 #DELETE routines
 @router.delete('/',status_code=status.HTTP_202_ACCEPTED)
-async def delete_routine(routine_id:Optional[int],db:AsyncSession= Depends(get_session),user_logged :users_models = Depends(get_current_user)):
+async def delete_routine(routine_id:int,db:AsyncSession= Depends(get_session),user_logged :users_models = Depends(get_current_user)):
     try:
         if user_logged:
             await routines_service.drop_routine(routine_id,db)

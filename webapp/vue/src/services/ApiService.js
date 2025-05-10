@@ -103,6 +103,18 @@ const ApiService = {
     );
     return response.data;
   },
+
+  deleteRoutine : async (id) => {
+    const response = await api.delete(`/routines/`, {
+      params: {
+        routine_id: id,
+      },
+      headers: {
+        Authorization: `bearer ${localStorage.getItem("token")}`,
+      },
+    });
+    return response.data;
+  },
 };
 
 export default ApiService;

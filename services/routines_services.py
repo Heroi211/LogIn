@@ -111,7 +111,7 @@ async def drop_routine(id_routine:int,db:AsyncSession) -> bool:
         routine:routines_models = resultset.scalars().unique().first()
         
         if routine:
-            routine.active = False
+            routine.set_inactive()
             await session.commit()
             return True
         return False
