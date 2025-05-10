@@ -36,6 +36,7 @@ import apiService from "@/services/ApiService";
 import { useAppStore } from "@/stores/app";
 import { defineComponent, ref } from "vue";
 import { useRouter } from "vue-router";
+import { processQueue } from "@/services/ApiService";
 
 export default defineComponent({
   name: "FormLogin",
@@ -59,7 +60,8 @@ export default defineComponent({
       apiService
         .login(login.value, password.value)
         .then((response) => {
-          localStorage.setItem("token", response.access_token);
+          const token = response.access_token;  
+          localStorage.setItem("token", token);
           appStore.setAuthenticated(true);
           overlay.value = false;
           if (props.inModal) {
@@ -69,10 +71,12 @@ export default defineComponent({
             // Se estiver na página de login, redireciona para /home
             router.push("/home");
           }
+          processQueue(null, token);
         })
-        .catch(() => {
+        .catch((err) => {
           overlay.value = false;
           visivel.value = true;
+          processQueue(err, null);
           setTimeout(() => {
             visivel.value = false;
           }, 3000);

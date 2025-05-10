@@ -1,4 +1,3 @@
-// src/services/ApiService.js
 import axios from "axios";
 import { useAppStore } from "@/stores/app"; // Importa sua store global
 
@@ -6,20 +5,64 @@ const api = axios.create({
   baseURL: process.env.VUE_APP_API_BASEURL || "http://localhost:8000/v1",
 });
 
-// Interceptor para detectar respostas 401 (token expirado ou inválido)
+api.interceptors.request.use((config) => {
+  const token = localStorage.getItem("token");
+  if (token) {
+    config.headers["Authorization"] = `Bearer ${token}`;
+  }
+  return config;
+});
+
+let isRefreshing = false;
+let failedQueue = [];
+
+function processQueue(error, token = null) {
+  failedQueue.forEach(({ resolve, reject }) => {
+    if (error) reject(error);
+    else       resolve(token);
+  });
+  failedQueue = [];
+}
+
+
+
 api.interceptors.response.use(
   (response) => response,
   (error) => {
-    if (error.response && error.response.status === 401) {
-      // Remove o token armazenado
-      localStorage.removeItem("token");
-      // Aciona o modal de login através da store global
-      const appStore = useAppStore();
-      appStore.triggerLoginModal();
+    const { response, config } = error;
+    const originalRequest = config;
+
+    // se for 401 e ainda não tentou retry
+    if (response?.status === 401 && !originalRequest._retry) {
+      originalRequest._retry = true;
+
+      if (!isRefreshing) {
+        isRefreshing = true;
+        // dispara o login modal
+        useAppStore().triggerLoginModal();
+      }
+
+      // retorna uma nova Promise que ficará pendente até o usuário logar
+      return new Promise((resolve, reject) => {
+        failedQueue.push({ resolve, reject });
+      })
+        .then((newToken) => {
+          // ajusta o token do header e refaz o request
+          originalRequest.headers["Authorization"] = `Bearer ${newToken}`;
+          return api(originalRequest);
+        })
+        .catch((err) => Promise.reject(err))
+        .finally(() => {
+          isRefreshing = false;
+        });
     }
+
     return Promise.reject(error);
   }
 );
+
+
+
 
 const ApiService = {
   login: async (usuario, senha) => {
@@ -37,84 +80,27 @@ const ApiService = {
     );
     return response.data;
   },
+  getRoutines: ()    => api.get("/routines").then(r => r.data),
+  getClients:  ()    => api.get("/clients").then(r => r.data),
+  getUsers:    ()    => api.get("/users").then(r => r.data),
+  forgotPassword: e  => api.post(`/users/forgot-password/${e}`).then(r => r.data),
+  resetSenha:    (s, t) =>
+                      api.post("/users/reset-password", null, { params: { password: s, token: t } })
+                         .then(r => r.data),
+  signup:       u   => api.post("/users/signup", u).then(r => r.data),
+  salvarRotina: r   => api.post("/routines", {
+                        titulo: r.titulo,
+                        descricao: r.descricao,
+                        dt_vencimento: r.dt_vencimento,
+                        hr_estimativa: r.hr_estimativa,
+                      }).then(r => r.data),
+  deleteRoutine: id => api.delete("/routines", { params: { routine_id: id } })
+                         .then(r => r.data),
 
-  getRoutines: async () => {
-    const response = await api.get("/routines", {
-      headers: {
-        Authorization: `bearer ${localStorage.getItem("token")}`,
-      },
-    });
-    return response.data;
-  },
-
-  getClients: async () => {
-    const response = await api.get("/clients", {
-      headers: {
-        Authorization: `bearer ${localStorage.getItem("token")}`,
-      },
-    });
-    return response.data;
-  },
-
-  getUsers: async () => {
-    const response = await api.get("/users", {
-      headers: {
-        Authorization: `bearer ${localStorage.getItem("token")}`,
-      },
-    });
-    return response.data;
-  },
-
-  forgotPassword: async (email) => {
-    const response = await api.post(`/users/forgot-password/${email}`);
-    return response.data;
-  },
-
-  resetSenha: async (senha, token) => {
-    const response = await api.post(`/users/reset-password?password=${senha}&token=${token}`);
-    return response.data;
-  },
-
-  signup: async (userData) => {
-    const response = await api.post("/users/signup", {
-      name: userData.name,
-      password: userData.password,
-      email: userData.email,
-      phone: userData.phone,
-      cpf: userData.cpf,
-    });
-    return response.data;
-  },
-
-  salvarRotina: async (rotina) => {
-    const response = await api.post(
-      "/routines",
-      {
-        titulo: rotina.titulo,
-        descricao: rotina.descricao,
-        dt_vencimento: rotina.dt_vencimento,
-        hr_estimativa: rotina.hr_estimativa,
-      },
-      {
-        headers: {
-          Authorization: `bearer ${localStorage.getItem("token")}`,
-        },
-      }
-    );
-    return response.data;
-  },
-
-  deleteRoutine : async (id) => {
-    const response = await api.delete(`/routines/`, {
-      params: {
-        routine_id: id,
-      },
-      headers: {
-        Authorization: `bearer ${localStorage.getItem("token")}`,
-      },
-    });
-    return response.data;
-  },
 };
-
 export default ApiService;
+export { api, processQueue };
+ 
+
+
+
