@@ -1,18 +1,24 @@
 <template>
-  <v-data-table :loading="loading" :items="paginatedRoutines"  :row-props="rowProps"   :headers="computedHeaders" hide-default-footer dense
-    no-data-text="Nenhum resultado encontrado" loading-text="Carregando..."
-    no-results-text="Nenhum resultado encontrado" class="elevation-1"  >
-    
-    <!-- Top Toolbar -->
+  <v-data-table
+    :loading="loading"
+    :items="paginatedRoutines"
+    :row-props="rowProps"
+    :headers="computedHeaders"
+    hide-default-footer
+    dense
+    no-data-text="Nenhum resultado encontrado"
+    loading-text="Carregando..."
+    no-results-text="Nenhum resultado encontrado"
+    class="elevation-1"
+  >
     <template v-slot:top>
       <v-toolbar flat>
         <v-toolbar-title>Rotinas</v-toolbar-title>
-        <v-divider class="mx-4" inset vertical></v-divider>
-        <v-spacer></v-spacer>
-        <v-spacer></v-spacer>
-        <!-- Exibe os botões apenas se showActions for true -->
+        <v-divider class="mx-4" inset vertical />
+        <v-spacer />
+
         <template v-if="showActions">
-          <v-btn color="primary" dark class="mb-2" @click="dialog = true">
+          <v-btn color="primary" dark class="mb-2" @click="openConclude">
             Concluir Rotina
           </v-btn>
           <v-btn color="primary" dark class="mb-2" @click="dialog = true">
@@ -23,15 +29,22 @@
           </v-btn>
         </template>
       </v-toolbar>
-      <!-- Exibe o diálogo apenas se showActions for true -->
-      <RoutinesDialog v-if="showActions && dialog" 
-        @fechaModal="dialog = false" 
+
+      <RoutinesDialog
+        v-if="showActions && dialog"
+        @fechaModal="dialog = false"
         @atualiza="getRoutine"
         @success="notifyUser('Usuário editado', 'success', 'mdi-check')"
-        @fail="notifyUser('Falha ao Editar', 'red', 'mdi-alert-circle')" />
+        @fail="notifyUser('Falha ao Editar', 'red', 'mdi-alert-circle')"
+      />
+
+      <RoutinesConcludeDialog
+        v-if="showActions && concludeDialog"
+        @close="concludeDialog = false"
+        @completed="onConcluded"
+      />
     </template>
-    
-    <!-- Coluna de ações: Exibe apenas se showActions for true -->
+
     <template v-slot:[`item.actions`]="{ item }">
       <template v-if="showActions">
         <v-tooltip top color="blue">
@@ -42,16 +55,6 @@
           </template>
           <span>Editar</span>
         </v-tooltip>
-        <!-- <v-tooltip top color="red">
-          <template v-slot:activator="{ on, attrs }">
-            <v-span v-blind="attrs" v-on="on" class="mr-2">
-              <v-icon medium @click="deleteItem(item)">
-                mdi-delete
-              </v-icon>
-            </v-span>
-          </template>
-          <span>Deletar</span>
-        </v-tooltip> -->
         <v-tooltip top color="red">
           <template v-slot:activator="{ on, attrs }">
             <span v-bind="attrs" v-on="on" class="mr-2">
@@ -68,17 +71,22 @@
               Tem certeza que deseja deletar?
             </v-card-title>
             <v-card-actions>
-              <v-spacer></v-spacer>
-              <v-btn color="blue darken-1" text @click="closeDelete">Cancelar</v-btn>
-              <v-btn color="blue darken-1" text @click="deleteItemConfirm">Confirmar</v-btn>
-              <v-spacer></v-spacer>
+              <v-spacer />
+              <v-btn color="blue darken-1" text @click="closeDelete">
+                Cancelar
+              </v-btn>
+              <v-btn color="blue darken-1" text @click="deleteItemConfirm">
+                Confirmar
+              </v-btn>
+              <v-spacer />
             </v-card-actions>
           </v-card>
         </v-dialog>
       </template>
     </template>
   </v-data-table>
-   <v-row justify="center" class="mt-4" v-if="pageCount > 1">
+
+  <v-row justify="center" class="mt-4" v-if="pageCount > 1">
     <v-pagination
       v-model="page"
       :length="pageCount"
@@ -86,9 +94,17 @@
       color="primary"
     />
   </v-row>
-  
-  <v-snackbar v-model="snackbar.visible" multi-line :color="snackbar.color" :timeout="snackbar.timeout"
-    :top="snackbar.position === 'top'" min-width="0" elevation="0" rounded="pill">
+
+  <v-snackbar
+    v-model="snackbar.visible"
+    multi-line
+    :color="snackbar.color"
+    :timeout="snackbar.timeout"
+    :top="snackbar.position === 'top'"
+    min-width="0"
+    elevation="0"
+    rounded="pill"
+  >
     <v-layout align-center>
       <v-icon class="pr-3" dark>{{ snackbar.icon }}</v-icon>
       <div>{{ snackbar.text }}</div>
@@ -97,23 +113,19 @@
 </template>
 
 <script>
-import apiService from "@/services/ApiService";
 import { defineComponent, ref, computed, watch } from "vue";
-import RoutinesDialog from "./RoutinesDialog.vue";
 import { format } from "date-fns";
+import apiService from "@/services/ApiService";
+import RoutinesDialog from "./RoutinesDialog.vue";
+import RoutinesConcludeDialog from "./RoutinesConcludeDialog.vue";
 
 export default defineComponent({
   name: "RoutinesDatagrid",
-  components: { RoutinesDialog },
+  components: { RoutinesDialog, RoutinesConcludeDialog },
   props: {
- 
-    showActions: {
-      type: Boolean,
-      default: true,
-    }
+    showActions: { type: Boolean, default: true },
   },
   setup(props) {
-
     const headers = ref([
       { title: "titulo", key: "titulo" },
       { title: "descrição", key: "descricao" },
@@ -125,24 +137,22 @@ export default defineComponent({
       { title: "prazo", key: "dt_vencimento" },
       { title: "Actions", key: "actions", sortable: false },
     ]);
-    
-    
+
     const computedHeaders = computed(() => {
       if (props.showActions) {
         return headers.value;
       }
-      return headers.value.filter(header => header.key !== "actions");
+      return headers.value.filter((h) => h.key !== "actions");
     });
-    
-   
+
     const routines = ref([]);
     const dialog = ref(false);
-    const dialogEdit = ref(false);
     const dialogDelete = ref(false);
+    const concludeDialog = ref(false);
     const loading = ref(false);
     const selectedRoutine = ref(null);
     const selectedRoutineEdit = ref(null);
-    
+
     const snackbar = ref({
       color: "",
       icon: "",
@@ -152,7 +162,7 @@ export default defineComponent({
       visible: false,
     });
 
-    const page         = ref(1);
+    const page = ref(1);
     const itemsPerPage = 9;
 
     const pageCount = computed(() =>
@@ -165,37 +175,75 @@ export default defineComponent({
     });
 
     watch(routines, () => {
-    if (page.value > pageCount.value) {
-      page.value = pageCount.value || 1;
-    }
+      if (page.value > pageCount.value) {
+        page.value = pageCount.value || 1;
+      }
     });
+
+    function getRoutine() {
+      loading.value = true;
+      apiService
+        .getRoutines()
+        .then((resp) => {
+          routines.value = resp.map((routine) => {
+            if (routine.dt_vencimento) {
+              routine.dt_vencimento_raw = routine.dt_vencimento;
+              routine.dt_vencimento = format(
+                new Date(routine.dt_vencimento),
+                "dd/MM/yyyy HH:mm"
+              );
+            }
+            return routine;
+          });
+        })
+        .catch(() => {
+          routines.value = [];
+        })
+        .finally(() => {
+          loading.value = false;
+        });
+    }
+
+    function notifyUser(text, color, icon) {
+      snackbar.value = { visible: true, text, color, icon, position: "top", timeout: 5000 };
+    }
+
+    function rowProps({ item }) {
+      if (!item.dt_vencimento_raw) return {};
+      const due = new Date(item.dt_vencimento_raw);
+      const today = new Date();
+      return {
+        class: {
+          "expired-row": due < today,
+        },
+      };
+    }
 
     function editItem(item) {
       selectedRoutineEdit.value = item;
-      dialogEdit.value = true;
+      dialog.value = true;
     }
-    
+
     function deleteItem(item) {
       selectedRoutine.value = item;
       dialogDelete.value = true;
-  
     }
-    
+
     function closeDelete() {
       dialogDelete.value = false;
     }
-    
+
     function deleteItemConfirm() {
       if (!selectedRoutine.value) return;
       loading.value = true;
-      apiService.deleteRoutine(selectedRoutine.value.id)
+      apiService
+        .deleteRoutine(selectedRoutine.value.id)
         .then(() => {
           notifyUser("Rotina deletada com sucesso", "success", "mdi-check");
           getRoutine();
         })
-        .catch((err) => {
+        .catch(() => {
           notifyUser("Falha ao deletar rotina", "red", "mdi-alert-circle");
-          console.error(err);
         })
         .finally(() => {
           loading.value = false;
@@ -204,72 +252,42 @@ export default defineComponent({
         });
     }
 
-    
-    function notifyUser(text, color, icon) {
-      snackbar.value.visible = true;
-      snackbar.value.text = text;
-      snackbar.value.color = color;
-      snackbar.value.icon = icon;
-    }
-    
-    watch(dialog, async (newValue) => {
-      getRoutine();
-    });
-    
-    function getRoutine() {
-      loading.value = true;
-      apiService.getRoutines()
-      .then((resp) => {
-        routines.value = resp.map((routine) => {
-          if (routine.dt_vencimento) {
-            routine.dt_vencimento_raw = routine.dt_vencimento;
-            routine.dt_vencimento = format(new Date(routine.dt_vencimento), "dd/MM/yyyy HH:mm");
-            console.log(routine.dt_vencimento_raw + 'cassete');
-          }
-          return routine;
-        });
-      })
-      .catch((err) => {
-        routines.value = [];
-        console.error(err);
-      })
-      .finally(() => {
-        loading.value = false;
-      });
+    function openConclude() {
+      concludeDialog.value = true;
     }
 
-    function rowProps({ item }) {
-      console.log(item);
-      if (!item.dt_vencimento_raw) return {};
-      const due   = new Date(item.dt_vencimento_raw);
-      const today = new Date();
-      return {
-        class: { 
-          "expired-row": due < today 
-        }
-      };
+    function onConcluded() {
+      notifyUser("Rotina concluída com sucesso", "success", "mdi-check");
+      concludeDialog.value = false;
+      getRoutine();
     }
-    
+
     getRoutine();
-    
+
     return {
-      routines,
+      headers,
       computedHeaders,
+      routines,
       dialog,
       dialogDelete,
+      concludeDialog,
+      loading,
+      selectedRoutine,
+      selectedRoutineEdit,
+      snackbar,
+      page,
+      pageCount,
+      paginatedRoutines,
       editItem,
       deleteItem,
       closeDelete,
       deleteItemConfirm,
       getRoutine,
       notifyUser,
-      snackbar,
-      loading,
-      showActions: props.showActions,
       rowProps,
-      paginatedRoutines,
-      page,
-      pageCount,
+      openConclude,
+      onConcluded,
+      showActions: props.showActions,
     };
   },
 });

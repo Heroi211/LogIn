@@ -81,6 +81,8 @@ const ApiService = {
     return response.data;
   },
   getRoutines: ()    => api.get("/routines").then(r => r.data),
+  getAssignedRoutines: () =>api.get("/routines/assigned").then(r => r.data), 
+  completeRoutine: id => api.post(`/routines/${id}/complete`).then(r => r.data),  
   getClients:  ()    => api.get("/clients").then(r => r.data),
   getUsers:    ()    => api.get("/users").then(r => r.data),
   forgotPassword: e  => api.post(`/users/forgot-password/${e}`).then(r => r.data),
