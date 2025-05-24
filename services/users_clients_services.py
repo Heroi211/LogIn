@@ -31,7 +31,7 @@ async def select_user_client_by_clientid(client_id:int,db:AsyncSession) -> users
         querie = select(users_clients_models).filter(users_clients_models.client_id == client_id,users_clients_models.active==True)
         resultset = await session.execute(querie)
         user_client:users_clients_schemas.usersClients = resultset.scalars().unique().all()
-        return user_client
+        return user_client 
 
 async def select_user_client_by_userid(user_id:int,db:AsyncSession) -> users_clients_schemas.usersClients:
     async with db as session:

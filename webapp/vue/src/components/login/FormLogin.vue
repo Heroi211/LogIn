@@ -55,14 +55,18 @@ export default defineComponent({
     const password = ref("");
     const visivel = ref(false);
 
-    function handleLogin() {
+    async function handleLogin() {
       overlay.value = true;
-      apiService
+      await apiService
         .login(login.value, password.value)
-        .then((response) => {
+        .then(async (response) => {
           const token = response.access_token;  
           localStorage.setItem("token", token);
+
           appStore.setAuthenticated(true);
+          const user = await apiService.getUserLogged();
+          console.log("user", user);
+          appStore.userLogged = user;
           overlay.value = false;
           if (props.inModal) {
             // Se estiver no modal, apenas fecha-o

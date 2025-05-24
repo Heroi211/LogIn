@@ -80,6 +80,7 @@ const ApiService = {
     );
     return response.data;
   },
+  getUserLogged: () => api.get("/users/logged").then(r => r.data),
   getRoutines: ()    => api.get("/routines").then(r => r.data),
   getAssignedRoutines: () =>api.get("/routines/assigned").then(r => r.data), 
   completeRoutine: id => api.post(`/routines/${id}/complete`).then(r => r.data),  
@@ -90,15 +91,16 @@ const ApiService = {
                       api.post("/users/reset-password", null, { params: { password: s, token: t } })
                          .then(r => r.data),
   signup:       u   => api.post("/users/signup", u).then(r => r.data),
-  salvarRotina: r   => api.post("/routines", {
+  salvarRotina: r   => api.post("/routines/", {
                         titulo: r.titulo,
                         descricao: r.descricao,
                         dt_vencimento: r.dt_vencimento,
                         hr_estimativa: r.hr_estimativa,
+                        clients_id: r.user_client,
                       }).then(r => r.data),
+  getAssignedClients: userid => api.get(`/users-clients/assigned/${userid}`).then(r => r.data), 
   deleteRoutine: id => api.delete("/routines", { params: { routine_id: id } })
                          .then(r => r.data),
-
 };
 export default ApiService;
 export { api, processQueue };

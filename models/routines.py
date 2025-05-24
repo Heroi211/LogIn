@@ -48,7 +48,7 @@ class Routines(modelsGeneric):
     client = relationship('Clients',back_populates="routine")
 
     # Métodos para manipulação de tarefas
-    def __init__(self, titulo, descricao, dt_vencimento=None, prioridade=3, hr_estimativa=0, hr_real=0, status=0):
+    def __init__(self, titulo, descricao, dt_vencimento=None, prioridade=3, hr_estimativa=0, hr_real=0, status=0,clients_id=None):
         self.titulo = titulo
         self.descricao = descricao
         self.is_completed = False
@@ -57,6 +57,7 @@ class Routines(modelsGeneric):
         self.hr_estimativa = hr_estimativa
         self.hr_real = hr_real
         self.status = status
+        self.clients_id = clients_id
 
     def complete_task(self):
         """Marca a tarefa como concluída."""

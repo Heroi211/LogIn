@@ -4,21 +4,26 @@
       <v-card-title>
         <span class="text-h5">Nova Rotina</span>
       </v-card-title>
-      <v-card-text>
+      <v-form ref="formRef" lazy-validation>
+        <v-card-text>
+        
         <v-container>
           <v-row>
+            
             <v-col cols="12" sm="6" md="4">
               <v-text-field
                 v-model="editUser.titulo"
                 label="Titulo"
-                aria-required="true"
+                :rules="[requiredRule]"
+                required
               />
             </v-col>
             <v-col cols="12" sm="6" md="4">
               <v-text-field
                 v-model="editUser.descricao"
                 label="Descrição"
-                aria-required="true"
+                :rules="[requiredRule]"
+                required
               />
             </v-col>
             <v-col cols="12" sm="6" md="4">
@@ -28,13 +33,30 @@
                 type="number"
                 prepend-icon="mdi-calendar"
                 @change="calcularPrazo"
+                :rules="[requiredRule]"
+                required
               />
             </v-col>
             <v-col cols="12" sm="6" md="4">
               <v-text-field
                 v-model="editUser.hr_estimativa"
                 label="Estimativa"
-                aria-required="true"
+                :rules="[requiredRule]"
+                required
+              />
+            </v-col>
+            <v-col cols="12" sm="6" md="4">
+              <v-select
+                v-model="editUser.user_client"
+                :items="clients"
+                item-title="razao_social"
+                item-value="id"
+                label="Cliente"
+                :loading="loadingClients"
+                dense
+                outlined
+                :rules="[requiredRule]"
+                required
               />
             </v-col>
           </v-row>
@@ -47,12 +69,13 @@
           </v-row>
         </v-container>
       </v-card-text>
+      </v-form>
       <v-card-actions>
         <v-spacer></v-spacer>
         <v-btn color="blue darken-1" text @click="$emit('fechaModal')">
           Cancelar
         </v-btn>
-        <v-btn color="blue darken-1" text @click="salvarRotina">
+        <v-btn color="blue darken-1" text @click="salvarRotina" :disabled="!canSave">
           Salvar
         </v-btn>
       </v-card-actions>
@@ -62,7 +85,9 @@
 
 <script>
 import apiService from '@/services/ApiService';
-import { defineComponent, ref } from 'vue';
+import { defineComponent, ref,computed } from 'vue';
+import { useAppStore } from '@/stores/app';
+
 
 export default defineComponent({
   name: "RoutinesDialog",
@@ -71,6 +96,34 @@ export default defineComponent({
     const dialog = ref(true);
     const editUser = ref({});
     const prazoDias = ref('');
+    const clients = ref([]);
+    const loadingClients = ref(false);
+    const appStore = useAppStore();
+    const userLoggedId = appStore.userLogged.id;
+    const formRef = ref(null);
+    const requiredRule = value => !!value || 'Campo obrigatório';
+
+    const canSave = computed(() =>
+    !!editUser.value.titulo &&
+    !!editUser.value.descricao &&
+    !!prazoDias.value &&
+    !!editUser.value.hr_estimativa &&
+    !!editUser.value.user_client
+                            ); 
+    async function getClientes() {
+      loadingClients.value = true;
+      try {
+        clients.value = await apiService.getAssignedClients(userLoggedId);
+      } catch (err) {
+        console.error("Erro ao carregar clientes:", err); 
+      } finally {
+        loadingClients.value = false;
+      }
+    }
+
+    onMounted(async() => {
+      getClientes(userLoggedId);
+    });
 
     function calcularPrazo() {
       const dias = parseInt(prazoDias.value);
@@ -86,6 +139,7 @@ export default defineComponent({
 
     async function salvarRotina() {
       try {
+        console.log("cliente_id", editUser.value);
         const novaRotina = await apiService.salvarRotina(editUser.value);
         console.log("Rotina salva:", novaRotina);
         emit('success', 'Rotina criada com sucesso!', 'success', 'mdi-check');
@@ -109,6 +163,12 @@ export default defineComponent({
       calcularPrazo,
       salvarRotina,
       formatDate,
+      getClientes,
+      clients,
+      loadingClients,
+      formRef,
+      requiredRule,
+      canSave,
     };
   },
 });

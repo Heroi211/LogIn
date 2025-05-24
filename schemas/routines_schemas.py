@@ -46,6 +46,8 @@ class routines_all(routines):
     hr_estimativa: Optional[int] = None
     hr_real: Optional[int] = None
     status: Optional[str] = None
+    
+
 
 
     

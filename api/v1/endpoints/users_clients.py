@@ -1,7 +1,9 @@
 from fastapi import APIRouter,HTTPException, status,Depends
 from schemas import users_clients_schemas as users_clients_schemas
+from schemas import clients_schemas as clients_schemas
 from models import users_clients as users_clients_models
 from services import users_clients_services as users_clients_service
+from services import clients_services as clients_service
 
 from models.roles import Roles as roles_models
 from models.users import Users as users_models
@@ -69,6 +71,37 @@ async def get_users_clients_byclientid(key:int,origem:int, db:AsyncSession = Dep
             raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED,detail="Você não possui permissão para consultar esses dados.")
         else:
             raise HTTPException(status_code=status.HTTP_404_NOT_FOUND,detail='Usuário não encontrado.')
+
+#GET users_clients by user_id     
+@router.get('/assigned/{users_client_id}',status_code=status.HTTP_200_OK, response_model=list[clients_schemas.clientsGetNames])
+async def get_users_client_byuserid(users_client_id:int,db:AsyncSession = Depends(get_session),user_logged:users_models = Depends(get_current_user)):
+    try:
+        if user_logged.role_id in (4,3):
+            user_clients:users_clients_schemas.usersClientsGetNames = await users_clients_service.select_user_client_by_userid(users_client_id,db)  
+            if user_clients:
+                clients_data = []
+                for client in user_clients:
+                    id_client = client.client_id
+                    clients = await clients_service.select_client(id_client,db)
+                    clients_data.append(
+                        {
+                            "id": clients.id,
+                            "razao_social": clients.razao_social,
+                        }
+                    )
+                return clients_data
+            else:
+                raise HTTPException(status_code=status.HTTP_404_NOT_FOUND)
+        else:
+            raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED)
+    except HTTPException as e:
+        if e.status_code == status.HTTP_400_BAD_REQUEST:
+            raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail="Ocorreu um erro durante a solicitação.")
+        elif e.status_code == status.HTTP_400_BAD_REQUEST:
+            raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED,detail="Você não possui permissão para consultar esses dados.")
+        else:
+            raise HTTPException(status_code=status.HTTP_404_NOT_FOUND,detail='Usuário não encontrado.')
+             
 
 
 #DELETE users_clients

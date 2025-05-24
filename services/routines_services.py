@@ -4,21 +4,22 @@ from typing import List
 from models.routines import Routines as routines_models
 from models.clients import Clients as clients
 from models.users import Users as users
+from models.users_clients import Users_Clients as users_clients
 from schemas import routines_schemas as routines_schemas
 from services.utils import to_utc
 import datetime
 
+
 async def register_routines(routine:routines_schemas.routines,db:AsyncSession) -> routines_models : 
     
-    async with db as session:  
-        
+    async with db as session:       
         raw = routine.dt_vencimento
         dt_utc = to_utc(raw)
         
-        if routine.users_id or routine.clients_id:  
+        if routine.clients_id:  
             new_routine = routines_models(titulo=routine.titulo,descricao=routine.descricao,
                                     dt_vencimento=to_utc(routine.dt_vencimento),prioridade=routine.prioridade,
-                                    users_id=routine.users_id,clients_id=routine.clients_id,
+                                    clients_id=routine.clients_id,
                                     hr_estimativa=routine.hr_estimativa,
                                     status=routine.status)
         else:

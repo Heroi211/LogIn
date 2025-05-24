@@ -26,3 +26,11 @@ class clientsGetData(clients):
     phone: Optional[str] = None
     tarefas: Optional[int] = None
     
+class clientsGetNames(BaseModel):
+    id : int 
+    razao_social: str
+    
+    class Config:
+        orm_mode = True
+   
+    
