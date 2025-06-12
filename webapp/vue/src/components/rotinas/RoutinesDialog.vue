@@ -9,7 +9,7 @@
         
         <v-container>
           <v-row>
-            
+          
             <v-col cols="12" sm="6" md="4">
               <v-text-field
                 v-model="editUser.titulo"
@@ -108,7 +108,7 @@ export default defineComponent({
     !!editUser.value.descricao &&
     !!prazoDias.value &&
     !!editUser.value.hr_estimativa &&
-    !!editUser.value.user_client
+    !!editUser.value.user_client 
                             ); 
     async function getClientes() {
       loadingClients.value = true;

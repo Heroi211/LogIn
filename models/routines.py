@@ -1,7 +1,8 @@
-from sqlalchemy import Column, Integer, String, Boolean, DateTime, ForeignKey
+from sqlalchemy import Column, Integer, String, Boolean, DateTime, ForeignKey,Float
 from sqlalchemy.orm import relationship
 from core.generic import modelsGeneric
-
+from services.utils import calcular_diferenca_horas
+from datetime import datetime
 # Classe de modelo de dados
 class Routines(modelsGeneric):
     
@@ -10,13 +11,15 @@ class Routines(modelsGeneric):
     STATUS_CONCLUIDA = 3
     STATUS_CANCELADA = 4
     STATUS_VENCIDA = 5
+    STATUS_PAUSADA = 6
 
     STATUS_ROTINA = [
         (STATUS_ABERTA, 'Aberta'), # Nenhum usuário atribuido
         (STATUS_EXECUTANDO, 'Executando'), # Usuário atribuido 
         (STATUS_CONCLUIDA, 'Concluída'), # Concluída
         (STATUS_CANCELADA, 'Cancelada'), # Cancelada pelo cliente
-        (STATUS_VENCIDA, 'Vencida') # SLA estourado
+        (STATUS_VENCIDA, 'Vencida'), # SLA estourado
+        (STATUS_PAUSADA, 'Pausada'), # Pausada pelo usuário
     ]
     
     BAIXA = 1
@@ -36,12 +39,18 @@ class Routines(modelsGeneric):
     descricao = Column(String(500), nullable=False)
     is_completed = Column(Boolean, default=False, nullable=False)
     dt_vencimento = Column(DateTime, nullable=True)
+    dt_inicio_task = Column(DateTime, nullable=True) 
+    dt_pause_task = Column(DateTime, nullable=True) 
+    dt_replay_task = Column(DateTime, nullable=True)  # Data de reinício da tarefa após pausa
+    motivo_pause_task = Column(String(500), nullable=True)  # Motivo da pausa da tarefa
+    dt_conclusao_task = Column(DateTime, nullable=True)  # Data de conclusão da tarefa
     prioridade = Column(Integer, nullable=True)  # Usaremos um valor numérico para a prioridade: 1 (Alta), 2 (Média), 3 (Baixa)
     users_id = Column(Integer, ForeignKey('users.id'))
     clients_id = Column(Integer, ForeignKey('clients.id'))
     hr_estimativa = Column(Integer, nullable=True)  # Campo opcional para horas estimadas
-    hr_real = Column(Integer, nullable=True)  # Campo opcional para horas reais
+    hr_real = Column(Float, nullable=True)  # Campo opcional para horas reais
     status = Column(Integer, nullable=False)  # Status pode representar diferentes estados, como "em andamento", "concluído", etc.
+
 
     # Relações com outras tabelas
     user = relationship('Users',back_populates="routine")
@@ -58,12 +67,38 @@ class Routines(modelsGeneric):
         self.hr_real = hr_real
         self.status = status
         self.clients_id = clients_id
+        
+    def play_task(self, userLogged:int):
+        """Inicia a tarefa, marcando-a como em execução."""
+        if self.status == self.STATUS_ABERTA:
+            self.users_id = userLogged
+            self.dt_inicio_task = datetime.now()
+        elif self.status == self.STATUS_PAUSADA:# Define a data de início como agora
+            self.dt_replay_task = datetime.now()  # Define a data de reinício como agora
+        
+        self.status = self.STATUS_EXECUTANDO
+        print(f"Tarefa '{self.titulo}' iniciada por usuário {userLogged}.")
 
+    def pause_task(self,motivo:str):
+        """Pausa a tarefa, mantendo o status atual."""
+        if self.status == self.STATUS_EXECUTANDO:
+            self.status = self.STATUS_PAUSADA
+            self.dt_pause_task = datetime.now()  # Define a data de pausa como agora
+            self.motivo_pause_task = motivo  # Motivo da pausa
+            
+            print(f"Tarefa '{self.titulo}' pausada.")
+        
+    
     def complete_task(self):
         """Marca a tarefa como concluída."""
-        self.is_completed = True
-        print(f"Tarefa '{self.titulo}' marcada como concluída.")
-        
+        if self.status == self.STATUS_EXECUTANDO:
+            if (self.users_id and self.clients_id):    
+                self.dt_conclusao_task = datetime.now()  # Define a data de conclusão como agora
+                self.is_completed = True
+                self.status = self.STATUS_CONCLUIDA
+                self.hr_real = int(calcular_diferenca_horas(self.dt_inicio_task,datetime.now()))  # Supondo que as horas reais sejam iguais às estimadas ao concluir
+                print(f"Tarefa '{self.titulo}' marcada como concluída.")
+                
     def get_status_display(self):
         """Retorna o status da tarefa."""
         for status_value, status_label in self.STATUS_ROTINA:

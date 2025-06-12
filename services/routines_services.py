@@ -7,26 +7,20 @@ from models.users import Users as users
 from models.users_clients import Users_Clients as users_clients
 from schemas import routines_schemas as routines_schemas
 from services.utils import to_utc
-import datetime
 
 
 async def register_routines(routine:routines_schemas.routines,db:AsyncSession) -> routines_models : 
     
     async with db as session:       
-        raw = routine.dt_vencimento
-        dt_utc = to_utc(raw)
-        
+              
         if routine.clients_id:  
-            new_routine = routines_models(titulo=routine.titulo,descricao=routine.descricao,
-                                    dt_vencimento=to_utc(routine.dt_vencimento),prioridade=routine.prioridade,
-                                    clients_id=routine.clients_id,
-                                    hr_estimativa=routine.hr_estimativa,
-                                    status=routine.status)
-        else:
-            new_routine = routines_models(titulo=routine.titulo,descricao=routine.descricao,
-                                dt_vencimento=dt_utc,prioridade=routine.prioridade,
-                                hr_estimativa=routine.hr_estimativa,
-                                status=routine.status)  
+            new_routine = routines_models(titulo=routine.titulo,
+                                        descricao=routine.descricao,
+                                        dt_vencimento=to_utc(routine.dt_vencimento),
+                                        prioridade=routine.prioridade,
+                                        clients_id=routine.clients_id,
+                                        hr_estimativa=routine.hr_estimativa,
+                                        status=routine.status)
         session.add(new_routine)
         await session.commit()
         await session.refresh(new_routine)
@@ -64,7 +58,14 @@ async def select_routine(id_routine:int,db:AsyncSession) -> routines_schemas.rou
     async with db as session:
         querie = select(routines_models).filter(routines_models.id==id_routine, routines_models.active == True)
         resultset = await session.execute(querie)
-        routine:routines_schemas.routines = resultset.scalars().unique().first()
+        routine:routines_schemas.routines = resultset.scalars().unique().all()
+        return routine
+    
+async def select_routine_conclude(db:AsyncSession) -> routines_schemas.routines:
+    async with db as session:
+        querie = select(routines_models).filter(routines_models.active == True)
+        resultset = await session.execute(querie)
+        routine:routines_schemas.routines = resultset.scalars().unique().all()  
         return routine
 
 async def select_routine_by_client(id_client:int,db:AsyncSession) -> List[routines_schemas.routines]:
@@ -118,6 +119,42 @@ async def drop_routine(id_routine:int,db:AsyncSession) -> bool:
         
         if routine:
             routine.set_inactive()
+            await session.commit()
+            return True
+        return False
+    
+async def update_routine_complete(id_routine:int,db:AsyncSession) -> bool:
+    async with db as session:
+        querie = select(routines_models).filter(routines_models.id==id_routine, routines_models.active == True)
+        resultset = await session.execute(querie)
+        routine:routines_models = resultset.scalars().unique().one_or_none()
+        
+        if routine:
+            routine.complete_task()        
+            await session.commit()
+            return True
+        return False
+    
+async def update_routine_play(user_logged_id,id_routine:int,db:AsyncSession) -> bool:
+    async with db as session:
+        querie = select(routines_models).filter(routines_models.id==id_routine, routines_models.active == True)
+        resultset = await session.execute(querie)
+        routine:routines_models = resultset.scalars().unique().one_or_none()
+        
+        if routine:
+            routine.play_task(user_logged_id)     
+            await session.commit()
+            return True
+        return False
+    
+async def update_routine_pause(id_routine:int,db:AsyncSession) -> bool:
+    async with db as session:
+        querie = select(routines_models).filter(routines_models.id==id_routine, routines_models.active == True)
+        resultset = await session.execute(querie)
+        routine:routines_models = resultset.scalars().unique().one_or_none()
+        
+        if routine:
+            routine.pause_task()  # Assuming this method marks the task as inactive
             await session.commit()
             return True
         return False

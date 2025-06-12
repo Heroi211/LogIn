@@ -17,7 +17,7 @@ class routines(BaseModel):
     clients_id: Optional[int] = None
     hr_estimativa: int
     hr_real: Optional[int] = None
-    status: int = 1 
+    status: int = 1
 
     class Config:
         orm_mode = True
@@ -46,6 +46,13 @@ class routines_all(routines):
     hr_estimativa: Optional[int] = None
     hr_real: Optional[int] = None
     status: Optional[str] = None
+    
+class routinesGetNames(BaseModel):
+    id: int
+    titulo: str
+
+    class Config:
+        orm_mode = True
     
 
 

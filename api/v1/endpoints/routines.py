@@ -67,6 +67,34 @@ async def get_routine(routine_id:Optional[int], db:AsyncSession = Depends(get_se
         else:
             raise HTTPException(status_code=status.HTTP_404_NOT_FOUND,detail='Usuário não encontrado.')
 
+#GET routines assigned
+@router.get('/conclude',status_code=status.HTTP_200_OK, response_model=List[routines_schemas.routinesGetNames])
+async def get_routine(db:AsyncSession = Depends(get_session),user_logged :users_models = Depends(get_current_user)):
+    try:
+        if user_logged:
+            routines_data = []
+            routines:routines_schemas.routines = await routines_service.select_routine_conclude(db)
+            if routines:
+                for routine in routines:
+                    routines_data.append(
+                            {
+                                "id": routine.id,
+                                "titulo": routine.titulo,
+                            }
+                        )
+                return routines_data
+            else:
+                raise HTTPException(status_code=status.HTTP_404_NOT_FOUND)
+        else:
+                    raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED)
+    except HTTPException as e:
+        if e.status_code == status.HTTP_400_BAD_REQUEST:
+            raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail="Ocorreu um erro durante a solicitação.")
+        elif e.status_code == status.HTTP_400_BAD_REQUEST:
+            raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED,detail="Você não possui permissão para consultar esses dados.")
+        else:
+            raise HTTPException(status_code=status.HTTP_404_NOT_FOUND,detail='Usuário não encontrado.')
+
 #GET Routine by client
 @router.get('/client',status_code=status.HTTP_200_OK, response_model=routines_schemas.routines)
 async def get_routine_by_client(client_id:Optional[int], db:AsyncSession = Depends(get_session),user_logged :users_models = Depends(get_current_user)):
@@ -123,7 +151,45 @@ async def put_routines(routine_id:Optional[int], routine:routines_schemas.routin
             raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED,detail="Você não possui permissão para consultar esses dados.")
     
     
-    
+@router.put('/{routine_id}/complete',status_code=status.HTTP_202_ACCEPTED)
+async def put_routine_complete(routine_id:int, db:AsyncSession = Depends(get_session),user_logged :users_models = Depends(get_current_user)):
+    try:
+        if user_logged:
+            await routines_service.update_routine_complete(routine_id,db)
+        else:
+            raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED)
+    except HTTPException as e:
+        if e.status_code != status.HTTP_401_UNAUTHORIZED:
+            raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail="Ocorreu um erro durante a solicitação.")
+        else:
+            raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED,detail="Você não possui permissão para consultar esses dados.")
+
+@router.put('/{routine_id}/play',status_code=status.HTTP_202_ACCEPTED)
+async def put_routine_play(routine_id:int, db:AsyncSession = Depends(get_session),user_logged :users_models = Depends(get_current_user)):
+    try:
+        if user_logged:
+            await routines_service.update_routine_play(user_logged.id,routine_id,db)
+        else:
+            raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED)
+    except HTTPException as e:
+        if e.status_code != status.HTTP_401_UNAUTHORIZED:
+            raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail="Ocorreu um erro durante a solicitação.")
+        else:
+            raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED,detail="Você não possui permissão para consultar esses dados.")
+
+@router.put('/{routine_id}/pause',status_code=status.HTTP_202_ACCEPTED)
+async def put_routine_pause(routine_id:int, db:AsyncSession = Depends(get_session),user_logged :users_models = Depends(get_current_user)):
+    try:
+        if user_logged:
+            await routines_service.update_routine_pause(user_logged.id,routine_id,db)
+        else:
+            raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED)
+    except HTTPException as e:
+        if e.status_code != status.HTTP_401_UNAUTHORIZED:
+            raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail="Ocorreu um erro durante a solicitação.")
+        else:
+            raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED,detail="Você não possui permissão para consultar esses dados.")
+
 
 #DELETE routines
 @router.delete('/',status_code=status.HTTP_202_ACCEPTED)

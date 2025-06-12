@@ -26,4 +26,28 @@ def processar_origem(origem: int):
             return 2 #User ID
     except Exception as e:
         return None
+    
+def calcular_diferenca_horas(dt_inicio: datetime, dt_fim: datetime,dt_pause:datetime,dt_replay:datetime) -> float:
+    """
+    Calcula a diferença em horas entre duas datas, descontando o tempo de pausa se fornecido.
+    :param dt_inicio: Data e hora de início.
+    :param dt_fim: Data e hora de fim.
+    :param dt_pause: Data e hora em que a task foi pausada (opcional).
+    :param dt_replay: Data e hora em que a task foi retomada (opcional).
+    :return: Diferença em horas, descontando o tempo de pausa.
+    """
+    if dt_inicio is None or dt_fim is None:
+        return 0.0
+
+    total_seconds = (dt_fim - dt_inicio).total_seconds()
+
+    if dt_pause is not None and dt_replay is not None:
+        # Só desconta se dt_pause < dt_replay e ambos dentro do intervalo
+        pause_start = max(dt_pause, dt_inicio)
+        pause_end = min(dt_replay, dt_fim)
+        if pause_end > pause_start:
+            pause_seconds = (pause_end - pause_start).total_seconds()
+            total_seconds -= pause_seconds
+
+    return total_seconds / 3600.0
 

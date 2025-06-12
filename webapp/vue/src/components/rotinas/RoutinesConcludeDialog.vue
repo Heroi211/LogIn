@@ -10,7 +10,7 @@
           <v-select
             v-model="selectedId"
             :items="routines"
-            item-text="titulo"
+            item-title="titulo"
             item-value="id"
             label="Selecione a rotina"
             :loading="loading"
@@ -54,8 +54,10 @@ export default defineComponent({
     async function fetchAssigned() {
       loading.value = true;
       try {
+        console.log("Carregando rotinas atribuídas...");
         routines.value = await apiService.getAssignedRoutines();
       } catch (e) {
+        console.error("Erro ao carregar rotinas atribuídas:", e);
         console.error("Erro ao carregar rotinas:", e);
       } finally {
         loading.value = false;

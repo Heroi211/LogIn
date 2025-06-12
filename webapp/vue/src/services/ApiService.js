@@ -82,7 +82,7 @@ const ApiService = {
   },
   getUserLogged: () => api.get("/users/logged").then(r => r.data),
   getRoutines: ()    => api.get("/routines").then(r => r.data),
-  getAssignedRoutines: () =>api.get("/routines/assigned").then(r => r.data), 
+  getAssignedRoutines: () => api.get("/routines/conclude").then(r => r.data), //precisa de ajustes para o futuro onde outros utilizarão o sistema.
   completeRoutine: id => api.post(`/routines/${id}/complete`).then(r => r.data),  
   getClients:  ()    => api.get("/clients").then(r => r.data),
   getUsers:    ()    => api.get("/users").then(r => r.data),
@@ -101,6 +101,10 @@ const ApiService = {
   getAssignedClients: userid => api.get(`/users-clients/assigned/${userid}`).then(r => r.data), 
   deleteRoutine: id => api.delete("/routines", { params: { routine_id: id } })
                          .then(r => r.data),
+  playRoutine : id => api.put(`/routines/${id}/play`)
+                        .then(r => r.data),
+  pauseRoutine : id => api.put(`/routines/${id}/pause`)
+                        .then(r => r.data),
 };
 export default ApiService;
 export { api, processQueue };

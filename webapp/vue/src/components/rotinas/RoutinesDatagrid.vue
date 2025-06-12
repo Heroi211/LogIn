@@ -21,9 +21,9 @@
           <v-btn color="primary" dark class="mb-2" @click="openConclude">
             Concluir Rotina
           </v-btn>
-          <v-btn color="primary" dark class="mb-2" @click="dialog = true">
+          <!-- <v-btn color="primary" dark class="mb-2" @click="dialog = true">
             Atribuir Rotina
-          </v-btn>
+          </v-btn> -->
           <v-btn color="primary" dark class="mb-2" @click="dialog = true">
             Nova Rotina
           </v-btn>
@@ -47,6 +47,22 @@
 
     <template v-slot:[`item.actions`]="{ item }">
       <template v-if="showActions">
+        <v-tooltip top color="blue">
+          <template v-slot:activator="{ on, attrs }">
+          <v-btn icon variant="text" v-bind="attrs" v-on="on" :disabled="item.status !== 'Executando'" @click="PauseItem(item)" >
+            <v-icon>mdi-pause-circle</v-icon>
+          </v-btn>
+          </template>
+          <span>Pause</span>
+        </v-tooltip>
+        <v-tooltip top color="blue">
+          <template v-slot:activator="{ on, attrs }">
+            <v-btn icon variant="text" v-bind="attrs" v-on="on" :disabled="!['Aberta', 'Pausada'].includes(item.status)" @click="playItem(item)" >
+              <v-icon > mdi-play-circle </v-icon>
+            </v-btn>
+          </template>
+          <span>Play</span>
+        </v-tooltip>
         <v-tooltip top color="blue">
           <template v-slot:activator="{ on }">
             <v-icon medium class="mr-2" @click="editItem(item)" v-on="on">
@@ -78,6 +94,36 @@
               <v-btn color="blue darken-1" text @click="deleteItemConfirm">
                 Confirmar
               </v-btn>
+              <v-spacer />
+            </v-card-actions>
+          </v-card>
+        </v-dialog>
+        <v-dialog v-model="dialogPlay" max-width="600px">
+          <v-card>
+            <v-card-title class="text-h5 justify-center">
+              Tem certeza que deseja iniciar a rotina selecionada?
+            </v-card-title>
+            <v-card-actions>
+              <v-spacer />
+              <v-btn color="blue darken-1" text @click="closePlay">
+                Cancelar
+              </v-btn>
+              <v-btn color="blue darken-1" text @click="playItemConfirm">
+                Confirmar
+              </v-btn>
+              <v-spacer />
+            </v-card-actions>
+          </v-card>
+        </v-dialog>
+        <v-dialog v-model="dialogPause" max-width="600px">
+          <v-card>
+            <v-card-title class="text-h5 justify-center">
+              Tem certeza que deseja pausar a rotina selecionada?
+            </v-card-title>
+            <v-card-actions>
+              <v-spacer />
+              <v-btn text @click="closePause">Cancelar</v-btn>
+              <v-btn text @click="pauseItemConfirm">Confirmar</v-btn>
               <v-spacer />
             </v-card-actions>
           </v-card>
@@ -127,6 +173,7 @@ export default defineComponent({
   },
   setup(props) {
     const headers = ref([
+      { title: "id", key: "id"},
       { title: "titulo", key: "titulo" },
       { title: "descrição", key: "descricao" },
       { title: "status", key: "status" },
@@ -148,6 +195,8 @@ export default defineComponent({
     const routines = ref([]);
     const dialog = ref(false);
     const dialogDelete = ref(false);
+    const dialogPlay = ref(false);
+    const dialogPause = ref(false);
     const concludeDialog = ref(false);
     const loading = ref(false);
     const selectedRoutine = ref(null);
@@ -186,6 +235,7 @@ export default defineComponent({
         .getRoutines()
         .then((resp) => {
           routines.value = resp.map((routine) => {
+            console.log("Routine:", routine);
             if (routine.dt_vencimento) {
               routine.dt_vencimento_raw = routine.dt_vencimento;
               routine.dt_vencimento = format(
@@ -224,6 +274,20 @@ export default defineComponent({
       dialog.value = true;
     }
 
+    function playItem(item) {
+      selectedRoutine.value = item;
+      dialogPlay.value = true;
+    }
+
+    function PauseItem(item) {
+      if (item.status === "executando") {
+        selectedRoutine.value = item;
+        dialogPause.value = true;
+      } else {
+        playItem(item);
+      }
+    }
+
     function deleteItem(item) {
       selectedRoutine.value = item;
       dialogDelete.value = true;
@@ -231,6 +295,14 @@ export default defineComponent({
 
     function closeDelete() {
       dialogDelete.value = false;
+    }
+
+    function closePlay() {
+      dialogPlay.value = false;
+    }
+
+    function closePause() {
+      dialogPause.value = false;
     }
 
     function deleteItemConfirm() {
@@ -248,6 +320,46 @@ export default defineComponent({
         .finally(() => {
           loading.value = false;
           closeDelete();
+          selectedRoutine.value = null;
+        });
+    }
+
+    function playItemConfirm() {
+      if (!selectedRoutine.value) return;
+      loading.value = true;
+      console.log("Playing routine:", selectedRoutine.value.id);
+      apiService
+        .playRoutine(selectedRoutine.value.id)
+        .then(() => {
+          notifyUser("Rotina iniciada com sucesso", "success", "mdi-check");
+          getRoutine();
+        })
+        .catch(() => {
+          notifyUser("Falha ao iniciar rotina", "red", "mdi-alert-circle");
+        })
+        .finally(() => {
+          loading.value = false;
+          dialogPlay.value = false;
+          selectedRoutine.value = null;
+        });
+    }
+
+    function pauseItemConfirm() {
+      if (!selectedRoutine.value) return;
+      loading.value = true;
+      console.log("Pausing routine:", selectedRoutine.value.id);
+      apiService
+        .pauseRoutine(selectedRoutine.value.id)
+        .then(() => {
+          notifyUser("Rotina pausada com sucesso", "success", "mdi-check");
+          getRoutine();
+        })
+        .catch(() => {
+          notifyUser("Falha ao pausar rotina", "red", "mdi-alert-circle");
+        })
+        .finally(() => {
+          loading.value = false;
+          dialogPause.value = false;
           selectedRoutine.value = null;
         });
     }
@@ -270,6 +382,8 @@ export default defineComponent({
       routines,
       dialog,
       dialogDelete,
+      dialogPlay,
+      dialogPause,
       concludeDialog,
       loading,
       selectedRoutine,
@@ -279,9 +393,14 @@ export default defineComponent({
       pageCount,
       paginatedRoutines,
       editItem,
+      playItem,
       deleteItem,
+      PauseItem,
       closeDelete,
+      closePlay,
       deleteItemConfirm,
+      playItemConfirm,
+      pauseItemConfirm,
       getRoutine,
       notifyUser,
       rowProps,
