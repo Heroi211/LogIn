@@ -103,8 +103,11 @@ const ApiService = {
                          .then(r => r.data),
   playRoutine : id => api.put(`/routines/${id}/play`)
                         .then(r => r.data),
-  pauseRoutine : id => api.put(`/routines/${id}/pause`)
+  pauseRoutine : (id,motivo) => api.put(`/routines/pause`,{ id,motivo })
                         .then(r => r.data),
+  updateRoutine : id => api.put(`/routines/${id}`)
+                        .then(r => r.data),
+
 };
 export default ApiService;
 export { api, processQueue };

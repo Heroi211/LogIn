@@ -53,7 +53,13 @@ class routinesGetNames(BaseModel):
 
     class Config:
         orm_mode = True
+        
+class PauseRoutine(BaseModel):
+    id:int
+    motivo: str
     
+    class Config:
+        orm_mode = True
 
 
 

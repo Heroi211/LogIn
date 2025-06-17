@@ -147,14 +147,14 @@ async def update_routine_play(user_logged_id,id_routine:int,db:AsyncSession) -> 
             return True
         return False
     
-async def update_routine_pause(id_routine:int,db:AsyncSession) -> bool:
+async def update_routine_pause(id_routine:int,motivo_pause,db:AsyncSession) -> bool:
     async with db as session:
         querie = select(routines_models).filter(routines_models.id==id_routine, routines_models.active == True)
         resultset = await session.execute(querie)
         routine:routines_models = resultset.scalars().unique().one_or_none()
         
         if routine:
-            routine.pause_task()  # Assuming this method marks the task as inactive
+            routine.pause_task(motivo=motivo_pause)  # Assuming this method marks the task as inactive
             await session.commit()
-            return True
+            return True 
         return False

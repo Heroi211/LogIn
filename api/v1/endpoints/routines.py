@@ -150,9 +150,9 @@ async def put_routines(routine_id:Optional[int], routine:routines_schemas.routin
         else:
             raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED,detail="Você não possui permissão para consultar esses dados.")
     
-    
+#PUT COMPLETE    
 @router.put('/{routine_id}/complete',status_code=status.HTTP_202_ACCEPTED)
-async def put_routine_complete(routine_id:int, db:AsyncSession = Depends(get_session),user_logged :users_models = Depends(get_current_user)):
+async def put_routine_complete(routine_id:int,db:AsyncSession = Depends(get_session),user_logged :users_models = Depends(get_current_user)):
     try:
         if user_logged:
             await routines_service.update_routine_complete(routine_id,db)
@@ -164,6 +164,7 @@ async def put_routine_complete(routine_id:int, db:AsyncSession = Depends(get_ses
         else:
             raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED,detail="Você não possui permissão para consultar esses dados.")
 
+#PUT PLAY
 @router.put('/{routine_id}/play',status_code=status.HTTP_202_ACCEPTED)
 async def put_routine_play(routine_id:int, db:AsyncSession = Depends(get_session),user_logged :users_models = Depends(get_current_user)):
     try:
@@ -177,11 +178,14 @@ async def put_routine_play(routine_id:int, db:AsyncSession = Depends(get_session
         else:
             raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED,detail="Você não possui permissão para consultar esses dados.")
 
-@router.put('/{routine_id}/pause',status_code=status.HTTP_202_ACCEPTED)
-async def put_routine_pause(routine_id:int, db:AsyncSession = Depends(get_session),user_logged :users_models = Depends(get_current_user)):
+#PUT Pause
+@router.put('/pause',status_code=status.HTTP_202_ACCEPTED)
+async def put_routine_pause(payload: routines_schemas.PauseRoutine, db:AsyncSession = Depends(get_session),user_logged :users_models = Depends(get_current_user)):
     try:
         if user_logged:
-            await routines_service.update_routine_pause(user_logged.id,routine_id,db)
+            routine_id = payload.id
+            motivo_pause = payload.motivo
+            await routines_service.update_routine_pause(routine_id,motivo_pause,db)
         else:
             raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED)
     except HTTPException as e:
