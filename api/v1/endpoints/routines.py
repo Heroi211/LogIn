@@ -136,14 +136,13 @@ async def get_routine_by_user(user_id:Optional[int], db:AsyncSession = Depends(g
             raise HTTPException(status_code=status.HTTP_404_NOT_FOUND,detail='Usuário não encontrado.')
         
 #PUT routines
-@router.put('/{routine_id}',status_code=status.HTTP_202_ACCEPTED,response_model=routines_schemas.routines)
+@router.put('/{routine_id}',status_code=status.HTTP_202_ACCEPTED)
 async def put_routines(routine_id:int,payload: routines_schemas.routinesUpdate,db:AsyncSession = Depends(get_session),user_logged :users_models = Depends(get_current_user)):
     try:
         if user_logged:
             routine_id = routine_id
             routine_data = payload.model_dump(exclude_unset=True)
-            routines_update:routines_schemas.routines = await routines_service.update_routine(routine_id,routine_data,db)
-            return routines_update
+            await routines_service.update_routine(routine_id,routine_data,db)
         else:
             raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED)
     except HTTPException as e:

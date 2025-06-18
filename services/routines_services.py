@@ -82,34 +82,32 @@ async def select_routine_by_user(id_user:int,db:AsyncSession) -> List[routines_s
         routines:List[routines_schemas.routines] = resultset.scalars().unique().all()
         return routines
 
-async def update_routine(id_routine:int,routine:routines_schemas.routinesUpdate,db:AsyncSession) -> routines_models:
+async def update_routine(id_routine:int,routine:routines_schemas.routinesUpdate,db:AsyncSession) -> bool:
     async with db as session:
         querie = select(routines_models).filter(routines_models.id==id_routine, routines_models.active == True)
         resultset = await session.execute(querie)
         routine_up:routines_models = resultset.scalars().unique().one_or_none()
         
         if routine_up:
-            if routine.titulo:
-                routine_up.titulo = routine.titulo
-            if routine.descricao:
-                routine_up.descricao = routine.descricao
-            if routine.dt_vencimento:
-                routine_up.dt_vencimento = routine.dt_vencimento
-            if routine.prioridade:
-                routine_up.prioridade = routine.prioridade
-            if routine.users_id:
-                routine_up.users_id = routine.users_id
-            if routine.clients_id:
-                routine_up.clients_id = routine.clients_id
-            if routine.hr_estimativa:
-                routine_up.hr_estimativa = routine.hr_estimativa
-            if routine.hr_real:
-                routine_up.hr_real = routine.hr_real
-            if routine.status:
-                routine_up.status = routine.status
+            if routine['titulo']:
+                routine_up.titulo = routine['titulo']
+            if routine['descricao']:
+                routine_up.descricao = routine['descricao']
+            if routine['dt_vencimento']:
+                routine_up.dt_vencimento = to_utc(routine['dt_vencimento'])
+            if routine['prioridade']:
+                routine_up.prioridade = routine['prioridade']
+            if routine['users_id']:
+                routine_up.users_id = routine['users_id']
+            if routine['clients_id']:
+                routine_up.clients_id = routine['clients_id']
+            if routine['hr_estimativa']:
+                routine_up.hr_estimativa = routine['hr_estimativa']
+            if routine['status']:
+                routine_up.status = routine['status']
             await session.commit()
-            return routine
-        return None
+            return True
+        return False
     
 async def drop_routine(id_routine:int,db:AsyncSession) -> bool:
     async with db as session:

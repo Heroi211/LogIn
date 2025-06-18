@@ -91,6 +91,20 @@
                   required
                 />
               </v-col>
+              <!-- STATUS -->
+                <v-col cols="12" sm="6" md="4">
+                <v-select
+                  v-model="form.status"
+                  :items="status"
+                  item-title="label"
+                  item-value="value"
+                  label="Status"
+                  dense
+                  outlined
+                  :rules="[requiredRule]"
+                  required
+                />
+              </v-col>
             </v-row>
           </v-container>
         </v-card-text>
@@ -127,6 +141,14 @@ export default defineComponent({
       { value: 1, label: 'Baixa' },
       { value: 2, label: 'Média' },
       { value: 3, label: 'Alta' }
+    ]);
+    const status = ref([
+      { value: 1, label: 'Aberta' },
+      { value: 2, label: 'Executando' },
+      { value: 3, label: 'Concluída' },
+      { value: 4, label: 'Cancelada' },
+      { value: 5, label: 'Vencida' },
+      { value: 6, label: 'Pausada' }
     ]);
     const appStore = useAppStore();
     const userLoggedId = appStore.userLogged.id;
@@ -191,16 +213,31 @@ export default defineComponent({
         hr_estimativa: form.value.hr_estimativa,
         clients_id:    form.value.clients_id,
         users_id:      form.value.users_id,
-        prioridade:    form.value.prioridade,
+        prioridade:    null,
+        status:       null,
       }; 
         if (payload.dt_vencimento) payload.dt_vencimento = new Date(payload.dt_vencimento).toISOString();
         console.log('prioridade', payload.prioridade);
         console.log('payload', payload);
         console.log('props.routine.id', props.routine.id);
+        const sel = priorities.value.find(
+          p => p.label === form.value.prioridade || p.value === form.value.prioridade
+                                          );
+              payload.prioridade = sel
+                ? sel.value
+                : Number(form.value.prioridade);
+        const selStat = status.value.find(
+          s => s.label === form.value.status || s.value === form.value.status
+                                          );
+                  payload.status = selStat
+                    ? selStat.value
+                    : Number(form.value.status);
+        console.log('prioridade', payload.prioridade);
         await apiService.updateRoutine(props.routine.id, payload);
         emit('success');
         emit('atualiza');
         emit('fechaModal');
+        dialog.value = false;
       } catch {
         emit('fail');
       }
@@ -219,6 +256,7 @@ export default defineComponent({
       users,
       loadingUsers,
       priorities,
+      status,
       formRef,
       requiredRule,
       canSave,
