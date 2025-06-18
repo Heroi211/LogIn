@@ -23,5 +23,8 @@ class Roles(modelsGeneric):
     def __init__(self,description):
         self.description = description
     
-    def get_roles(self):
-        return self.ROLES[self.id][1]
+    def get_role_display(self) -> str:
+        for code, label in self.ROLES:
+            if code == self.id:
+                return label
+        return "Role inválida"

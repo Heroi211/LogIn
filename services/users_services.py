@@ -54,7 +54,7 @@ async def select_all_users(db:AsyncSession) -> List[users_schemas.usersGetData]:
                     "cpf":user.cpf,
                     "phone":user.phone,
                     "active":user.active,
-                    "role":role.get_roles(),
+                    "role":role.get_role_display(),
                     "tarefas":count
                 }
             )

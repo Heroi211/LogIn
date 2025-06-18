@@ -43,6 +43,16 @@
         @close="concludeDialog = false"
         @completed="onConcluded"
       />
+
+      <RoutinesEditDialog
+        v-if="showActions && dialogEdit"
+        :routine="selectedRoutineEdit"
+        @fechamodal="dialogEdit = false"
+        @atualiza="getRoutine"
+        @success="notifyUser('Rotina editada com sucesso', 'success', 'mdi-check')"
+        @fail="notifyUser('Falha ao editar rotina', 'red', 'mdi-alert-circle')"
+      />
+
     </template>
 
     <template v-slot:[`item.actions`]="{ item }">
@@ -63,6 +73,7 @@
           </template>
           <span>Play</span>
         </v-tooltip>
+
         <v-tooltip top color="blue">
           <template v-slot:activator="{ on }">
             <v-icon medium class="mr-2" @click="editItem(item)" v-on="on">
@@ -71,6 +82,7 @@
           </template>
           <span>Editar</span>
         </v-tooltip>
+
         <v-tooltip top color="red">
           <template v-slot:activator="{ on, attrs }">
             <span v-bind="attrs" v-on="on" class="mr-2">
@@ -81,6 +93,7 @@
           </template>
           <span>Deletar</span>
         </v-tooltip>
+
         <v-dialog v-model="dialogDelete" max-width="500px">
           <v-card>
             <v-card-title class="text-h5 justify-center">
@@ -98,6 +111,7 @@
             </v-card-actions>
           </v-card>
         </v-dialog>
+
         <v-dialog v-model="dialogPlay" max-width="600px">
           <v-card>
             <v-card-title class="text-h5 justify-center">
@@ -115,6 +129,7 @@
             </v-card-actions>
           </v-card>
         </v-dialog>
+
         <v-dialog v-model="dialogPause" max-width="600px">
           <v-card>
             <v-card-title class="text-h5 justify-center">
@@ -137,6 +152,7 @@
             </v-card-actions>
           </v-card>
         </v-dialog>
+
       </template>
     </template>
   </v-data-table>
@@ -173,10 +189,11 @@ import { format } from "date-fns";
 import apiService from "@/services/ApiService";
 import RoutinesDialog from "./RoutinesDialog.vue";
 import RoutinesConcludeDialog from "./RoutinesConcludeDialog.vue";
+import RoutinesEditDialog from "./RoutinesEditDialog.vue";
 
 export default defineComponent({
   name: "RoutinesDatagrid",
-  components: { RoutinesDialog, RoutinesConcludeDialog },
+  components: { RoutinesDialog, RoutinesConcludeDialog,RoutinesEditDialog },
   props: {
     showActions: { type: Boolean, default: true },
   },
@@ -202,11 +219,14 @@ export default defineComponent({
     });
 
     const routines = ref([]);
+
     const dialog = ref(false);
     const dialogDelete = ref(false);
     const dialogPlay = ref(false);
     const dialogPause = ref(false);
+    const dialogEdit = ref(false);
     const concludeDialog = ref(false);
+
     const loading = ref(false);
     const selectedRoutine = ref(null);
     const selectedRoutineEdit = ref(null);
@@ -280,8 +300,8 @@ export default defineComponent({
     }
 
     function editItem(item) {
-      selectedRoutineEdit.value = item;
-      dialog.value = true;
+      selectedRoutineEdit.value = {...item};
+      dialogEdit.value = true;
     }
 
     function playItem(item) {
@@ -336,7 +356,6 @@ export default defineComponent({
     function playItemConfirm() {
       if (!selectedRoutine.value) return;
       loading.value = true;
-      console.log("Playing routine:", selectedRoutine.value.id);
       apiService
         .playRoutine(selectedRoutine.value.id)
         .then(() => {
@@ -393,6 +412,7 @@ export default defineComponent({
       dialogDelete,
       dialogPlay,
       dialogPause,
+      dialogEdit,
       concludeDialog,
       loading,
       selectedRoutine,

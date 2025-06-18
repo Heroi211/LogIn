@@ -73,8 +73,8 @@ class Routines(modelsGeneric):
         if self.status == self.STATUS_ABERTA:
             self.users_id = userLogged
             self.dt_inicio_task = datetime.now()
-        elif self.status == self.STATUS_PAUSADA:# Define a data de início como agora
-            self.dt_replay_task = datetime.now()  # Define a data de reinício como agora
+        elif self.status == self.STATUS_PAUSADA:    # Define a data de início como agora
+            self.dt_replay_task = datetime.now()     # Define a data de reinício como agora
         
         self.status = self.STATUS_EXECUTANDO
         print(f"Tarefa '{self.titulo}' iniciada por usuário {userLogged}.")

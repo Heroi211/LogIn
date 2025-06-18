@@ -85,7 +85,7 @@ const ApiService = {
   getAssignedRoutines: () => api.get("/routines/conclude").then(r => r.data), //precisa de ajustes para o futuro onde outros utilizarão o sistema.
   completeRoutine: id => api.post(`/routines/${id}/complete`).then(r => r.data),  
   getClients:  ()    => api.get("/clients").then(r => r.data),
-  getUsers:    ()    => api.get("/users").then(r => r.data),
+  getUsers:    ()    => api.get("/users/").then(r => r.data),
   forgotPassword: e  => api.post(`/users/forgot-password/${e}`).then(r => r.data),
   resetSenha:    (s, t) =>
                       api.post("/users/reset-password", null, { params: { password: s, token: t } })
@@ -105,8 +105,9 @@ const ApiService = {
                         .then(r => r.data),
   pauseRoutine : (id,motivo) => api.put(`/routines/pause`,{ id,motivo })
                         .then(r => r.data),
-  updateRoutine : id => api.put(`/routines/${id}`)
+  updateRoutine : (id,payload) => api.put(`/routines/${id}`,payload)
                         .then(r => r.data),
+
 
 };
 export default ApiService;

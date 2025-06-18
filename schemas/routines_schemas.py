@@ -23,7 +23,7 @@ class routines(BaseModel):
         orm_mode = True
 
 
-class routinesUpdate(routines):
+class routinesUpdate(BaseModel):
     titulo: Optional[str] = None
     descricao: Optional[str] = None
     is_completed: Optional[bool] = None
@@ -34,6 +34,11 @@ class routinesUpdate(routines):
     hr_estimativa: Optional[int] = None
     hr_real: Optional[int] = None
     status: Optional[int] = None
+    
+    class Config:
+       orm_mode = True
+    
+
     
 class routines_all(routines):
     titulo: Optional[str] = None
