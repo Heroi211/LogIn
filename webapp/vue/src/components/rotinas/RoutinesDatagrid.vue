@@ -118,12 +118,21 @@
         <v-dialog v-model="dialogPause" max-width="600px">
           <v-card>
             <v-card-title class="text-h5 justify-center">
-              Tem certeza que deseja pausar a rotina selecionada?
+              Informe o motivo da pausa:
             </v-card-title>
+            <v-card-text>
+              <v-text-field
+                v-model="pauseReason"
+                label="Motivo ( Obrigatório )"
+                :rules="[v => !!v || 'Motivo é obrigatório']"
+                autocomplete="off"
+                required
+              />
+            </v-card-text>
             <v-card-actions>
               <v-spacer />
               <v-btn text @click="closePause">Cancelar</v-btn>
-              <v-btn text @click="pauseItemConfirm">Confirmar</v-btn>
+              <v-btn text :disabled="!pauseReason" @click="pauseItemConfirm">Confirmar</v-btn>
               <v-spacer />
             </v-card-actions>
           </v-card>
@@ -201,6 +210,7 @@ export default defineComponent({
     const loading = ref(false);
     const selectedRoutine = ref(null);
     const selectedRoutineEdit = ref(null);
+    const pauseReason = ref("");
 
     const snackbar = ref({
       color: "",
@@ -280,12 +290,9 @@ export default defineComponent({
     }
 
     function PauseItem(item) {
-      if (item.status === "executando") {
         selectedRoutine.value = item;
+        pauseReason.value = ""; // Reset pause reason
         dialogPause.value = true;
-      } else {
-        playItem(item);
-      }
     }
 
     function deleteItem(item) {
@@ -303,6 +310,8 @@ export default defineComponent({
 
     function closePause() {
       dialogPause.value = false;
+      pauseReason.value = ""; // Reset pause reason
+      selectedRoutine.value = null;
     }
 
     function deleteItemConfirm() {
@@ -345,11 +354,11 @@ export default defineComponent({
     }
 
     function pauseItemConfirm() {
-      if (!selectedRoutine.value) return;
+      if (!selectedRoutine.value || !pauseReason.value) return;
       loading.value = true;
-      console.log("Pausing routine:", selectedRoutine.value.id);
+      console.log("Pausing routine:", selectedRoutine.value.id,{ reason: pauseReason.value });
       apiService
-        .pauseRoutine(selectedRoutine.value.id)
+        .pauseRoutine(selectedRoutine.value.id, pauseReason.value )
         .then(() => {
           notifyUser("Rotina pausada com sucesso", "success", "mdi-check");
           getRoutine();
@@ -398,6 +407,7 @@ export default defineComponent({
       PauseItem,
       closeDelete,
       closePlay,
+      closePause,
       deleteItemConfirm,
       playItemConfirm,
       pauseItemConfirm,
@@ -407,6 +417,7 @@ export default defineComponent({
       openConclude,
       onConcluded,
       showActions: props.showActions,
+      pauseReason
     };
   },
 });
