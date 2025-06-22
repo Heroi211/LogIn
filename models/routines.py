@@ -96,7 +96,7 @@ class Routines(modelsGeneric):
                 self.dt_conclusao_task = datetime.now()  # Define a data de conclusão como agora
                 self.is_completed = True
                 self.status = self.STATUS_CONCLUIDA
-                self.hr_real = int(calcular_diferenca_horas(self.dt_inicio_task,datetime.now()))  # Supondo que as horas reais sejam iguais às estimadas ao concluir
+                self.hr_real = int(calcular_diferenca_horas(self.dt_inicio_task, datetime.now(), self.dt_pause_task, self.dt_replay_task))   # Supondo que as horas reais sejam iguais às estimadas ao concluir
                 print(f"Tarefa '{self.titulo}' marcada como concluída.")
                 
     def get_status_display(self):

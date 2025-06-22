@@ -3,7 +3,7 @@
     loading-text="Carregando..." no-data-text="Nenhum resultado encontrado"
     no-results-text="Nenhum resultado encontrado" class="elevation-1">
     <template v-slot:top>
-      <v-toolbar flat>
+      <!-- <v-toolbar flat>
         <v-toolbar-title>Usuario</v-toolbar-title>
         <v-divider class="mx-4" inset vertical></v-divider>
         <v-spacer></v-spacer>
@@ -11,7 +11,7 @@
         <v-btn color="primary" dark class="mb-2" @click="dialog = true">
           Novo Usuario
         </v-btn>
-      </v-toolbar>
+      </v-toolbar> -->
 
     </template>
     <template v-slot:[`item.actions`]="{ item }">

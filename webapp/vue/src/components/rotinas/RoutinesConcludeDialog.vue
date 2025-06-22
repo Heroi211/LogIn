@@ -72,7 +72,8 @@ export default defineComponent({
       if (!selectedId.value) return;
       loading.value = true;
       try {
-        await apiService.completeRoutine(selectedId.value);
+        console.log("Concluindo rotina com ID:", selectedId.value.id);
+        await apiService.completeRoutine(selectedId.value.id);
         emit("completed");
       } catch (e) {
         console.error("Falha ao concluir rotina:", e);

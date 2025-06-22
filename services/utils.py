@@ -49,5 +49,5 @@ def calcular_diferenca_horas(dt_inicio: datetime, dt_fim: datetime,dt_pause:date
             pause_seconds = (pause_end - pause_start).total_seconds()
             total_seconds -= pause_seconds
 
-    return total_seconds / 3600.0
+    return total_seconds / 3600.0  
 
