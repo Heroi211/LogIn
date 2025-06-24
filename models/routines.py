@@ -98,7 +98,7 @@ class Routines(modelsGeneric):
                 self.status = self.STATUS_CONCLUIDA
                 self.hr_real = int(calcular_diferenca_horas(self.dt_inicio_task, datetime.now(), self.dt_pause_task, self.dt_replay_task))   # Supondo que as horas reais sejam iguais às estimadas ao concluir
                 print(f"Tarefa '{self.titulo}' marcada como concluída.")
-                
+    
     def get_status_display(self):
         """Retorna o status da tarefa."""
         for status_value, status_label in self.STATUS_ROTINA:

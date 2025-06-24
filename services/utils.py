@@ -1,5 +1,5 @@
 import pytz
-from datetime import datetime
+from datetime import datetime, time
 from typing import Optional
 
 
@@ -36,18 +36,23 @@ def calcular_diferenca_horas(dt_inicio: datetime, dt_fim: datetime,dt_pause:date
     :param dt_replay: Data e hora em que a task foi retomada (opcional).
     :return: Diferença em horas, descontando o tempo de pausa.
     """
-    if dt_inicio is None or dt_fim is None:
+    
+    if not dt_inicio or not dt_fim:
         return 0.0
+
+    # Se vier somente time, combine com a data de início
+    if isinstance(dt_pause, time):
+        dt_pause = datetime.combine(dt_inicio.date(), dt_pause, tzinfo=dt_inicio.tzinfo)
+    if isinstance(dt_replay, time):
+        dt_replay = datetime.combine(dt_inicio.date(), dt_replay, tzinfo=dt_inicio.tzinfo)
 
     total_seconds = (dt_fim - dt_inicio).total_seconds()
 
-    if dt_pause is not None and dt_replay is not None:
-        # Só desconta se dt_pause < dt_replay e ambos dentro do intervalo
+    if dt_pause and dt_replay:
         pause_start = max(dt_pause, dt_inicio)
-        pause_end = min(dt_replay, dt_fim)
+        pause_end   = min(dt_replay, dt_fim)
         if pause_end > pause_start:
-            pause_seconds = (pause_end - pause_start).total_seconds()
-            total_seconds -= pause_seconds
+            total_seconds -= (pause_end - pause_start).total_seconds()
 
-    return total_seconds / 3600.0  
+    return total_seconds / 3600.0
 

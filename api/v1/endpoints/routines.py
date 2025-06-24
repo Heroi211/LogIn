@@ -180,7 +180,7 @@ async def put_routine_play(routine_id:int, db:AsyncSession = Depends(get_session
             raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED,detail="Você não possui permissão para consultar esses dados.")
 
 #PUT Pause
-@router.put('/pause',status_code=status.HTTP_202_ACCEPTED)
+@router.put('/pause/',status_code=status.HTTP_202_ACCEPTED)
 async def put_routine_pause(payload: routines_schemas.PauseRoutine, db:AsyncSession = Depends(get_session),user_logged :users_models = Depends(get_current_user)):
     try:
         if user_logged:

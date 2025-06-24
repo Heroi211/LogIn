@@ -63,7 +63,7 @@ async def select_routine(id_routine:int,db:AsyncSession) -> routines_schemas.rou
     
 async def select_routine_conclude(db:AsyncSession) -> routines_schemas.routines:
     async with db as session:
-        querie = select(routines_models).filter(routines_models.active == True)
+        querie = select(routines_models).filter(routines_models.active == True , routines_models.status == routines_models.STATUS_EXECUTANDO)
         resultset = await session.execute(querie)
         routine:routines_schemas.routines = resultset.scalars().unique().all()  
         return routine
@@ -128,9 +128,10 @@ async def update_routine_complete(id_routine:int,db:AsyncSession) -> bool:
         routine:routines_models = resultset.scalars().unique().one_or_none()
         
         if routine:
-            routine.complete_task()        
-            await session.commit()
-            return True
+            if routine.status == routine.STATUS_EXECUTANDO:
+                routine.complete_task()        
+                await session.commit()
+                return True
         return False
     
 async def update_routine_play(user_logged_id,id_routine:int,db:AsyncSession) -> bool:

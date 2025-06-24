@@ -311,7 +311,7 @@ export default defineComponent({
 
     function PauseItem(item) {
         selectedRoutine.value = item;
-        pauseReason.value = ""; // Reset pause reason
+        pauseReason.value = ""; 
         dialogPause.value = true;
     }
 
