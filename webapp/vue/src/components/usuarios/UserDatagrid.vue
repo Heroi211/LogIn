@@ -1,5 +1,5 @@
 <template>
-  <v-data-table :loading="loading" :items.sync="users" :headers="headers" hide-default-footer dense
+  <v-data-table :loading="loading" :items="users" :headers="headers" hide-default-footer dense
     loading-text="Carregando..." no-data-text="Nenhum resultado encontrado"
     no-results-text="Nenhum resultado encontrado" class="elevation-1">
     <template v-slot:top>
@@ -45,6 +45,15 @@
       </v-dialog>
     </template>
   </v-data-table>
+
+  <UsersEditDialog
+      v-if="dialogEdit"
+      :user="selectUserEdit"
+      @saved="onUpdated"
+      @close="dialogEdit = false"
+      @fail="notifyUser('Erro ao atualizar Usuario!', 'red', 'mdi-alert-circle')"
+    />
+
   <v-snackbar v-model="snackbar.visible" multi-line :color="snackbar.color" :timeout="snackbar.timeout"
     :top="snackbar.position === 'top'" min-width="0" elevation="0" rounded="pill">
     <v-layout align-center>
@@ -57,18 +66,21 @@
 <script>
 import { defineComponent } from 'vue';
 import apiService from '@/services/ApiService';
+import UsersEditDialog from './UserEditDialog.vue';
 
 export default defineComponent({
   name: "UsuariosDatagrid",
-  components: {
-
-  },
+  components: { UsersEditDialog },
   setup() {
     const loading = ref(false)
     const users = ref([])
-    const dialog = ref(false)
+
     const dialogEdit = ref(false)
     const dialogDelete = ref(false)
+
+    const selectUser = ref(null)
+    const selectUserEdit = ref(null)
+
 
     const headers = ref([
       { title: "Nome", key: "name" },
@@ -96,19 +108,42 @@ export default defineComponent({
     }
 
     function editItem(item) {
-      console.log(item)
+      selectUserEdit.value = item
+      console.log("Editando usuario", item)
       dialogEdit.value = true
     }
 
+      function onUpdated(){
+      notifyUser("Cliente atualizado com sucesso!", "green", "mdi-check-circle");
+      dialogEdit.value = false;
+      getClients();
+    }
+
     function deleteItem(item) {
-      console.log(item)
+      selectUser.value = item
+      dialogDelete.value = true
     }
 
     function closeDelete() {
       dialogDelete.value = false
     }
     function deleteItemConfirm(item) {
-      console.log(item)
+      if (!selectUser.value) return;
+      loading.value = true
+      apiService
+        .deleteUser(selectUser.value.id)
+        .then(() => {
+          notifyUser("Usuario deletado com sucesso!", "green", "mdi-check-circle");
+          dialogDelete.value = false;
+          getUsers();
+        })
+        .catch((err) => {
+          notifyUser("Erro ao deletar usuario!", "red", "mdi-alert-circle");
+          console.error(err);
+        })
+        .finally(() => {
+          loading.value = false
+        });
     }
     function getUsers() {
       loading.value = true
@@ -127,7 +162,6 @@ export default defineComponent({
     return {
       loading,
       users,
-      dialog,
       dialogEdit,
       dialogDelete,
       headers,
@@ -138,6 +172,10 @@ export default defineComponent({
       closeDelete,
       deleteItemConfirm,
       getUsers,
+      onUpdated,
+      selectUser,
+      selectUserEdit
+
     }
   }
 })

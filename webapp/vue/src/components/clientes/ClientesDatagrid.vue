@@ -1,5 +1,5 @@
 <template>
-  <v-data-table :loading="loading" :items.sync="clients" :headers="headers" hide-default-footer dense
+  <v-data-table :loading="loading" :items="clients" :headers="headers" hide-default-footer dense
     loading-text="Carregando..." no-data-text="Nenhum resultado encontrado"
     no-results-text="Nenhum resultado encontrado" class="elevation-1">
     <template v-slot:top>
@@ -8,7 +8,7 @@
         <v-divider class="mx-4" inset vertical></v-divider>
         <v-spacer></v-spacer>
         <v-spacer></v-spacer>
-        <v-btn color="primary" dark class="mb-2" @click="dialog = true">
+        <v-btn color="primary" dark class="mb-2" @click="openDialog">
           Novo Cliente
         </v-btn>
       </v-toolbar>
@@ -23,6 +23,7 @@
         </template>
         <span>Editar</span>
       </v-tooltip>
+
       <v-tooltip top color="red">
         <template v-slot:activator="{ on }">
           <v-icon medium class="mr-2" @click="deleteItem(item)" v-on="on">
@@ -31,6 +32,7 @@
         </template>
         <span>Deletar</span>
       </v-tooltip>
+
       <v-dialog v-model="dialogDelete" max-width="500px">
         <v-card>
           <v-card-title class="text-h5 justify-center">
@@ -45,6 +47,22 @@
       </v-dialog>
     </template>
   </v-data-table>
+      
+          <ClientsDialog
+        v-if="dialogNew"
+        @close="dialogNew = false"
+        @saved="onSaved"
+        @fail="onFail"
+      />
+
+          <ClientsEditDialog
+      v-if="dialogEdit"
+      :client="selectedClientEdit"
+      @saved="onUpdated"
+      @close="dialogEdit = false"
+      @fail="notifyUser('Erro ao atualizar cliente!', 'red', 'mdi-alert-circle')"
+    />
+
   <v-snackbar v-model="snackbar.visible" multi-line :color="snackbar.color" :timeout="snackbar.timeout"
     :top="snackbar.position === 'top'" min-width="0" elevation="0" rounded="pill">
     <v-layout align-center>
@@ -56,18 +74,28 @@
 <script>
 import { defineComponent, ref } from "vue";
 import apiService from "@/services/ApiService";
+import ClientsDialog from '@/components/clientes/ClientesDialog.vue';
+import ClientsEditDialog from '@/components/clientes/ClientesEditDialog.vue';
+
+import { se } from "date-fns/locale";
+
 
 export default defineComponent({
   name: "ClientesDatagrid",
-  components: {
-
-  },
+  components: { ClientsDialog, ClientsEditDialog },
   setup() {
-    const clients = ref([])
-    const dialog = ref(false)
-    const dialogEdit = ref(false)
-    const dialogDelete = ref(false)
-    const loading = ref(false)
+    const clients = ref([]);
+    const loading = ref(false);
+
+    // Dialogs
+    const dialogNew = ref(false);
+    const dialogEdit = ref(false);
+    const dialogDelete = ref(false);
+    
+    
+    const selectedClient = ref(null);
+    const selectedClientEdit = ref(null);
+
 
     const headers = ref([
       { title: "CNPJ", key: "cnpj" },
@@ -84,6 +112,26 @@ export default defineComponent({
       visible: false,
     })
 
+    function openDialog() {
+      dialogNew.value = true
+    }
+    
+    function onUpdated(){
+      notifyUser("Cliente atualizado com sucesso!", "green", "mdi-check-circle");
+      dialogEdit.value = false;
+      getClients();
+    }
+
+    function onSaved(){
+      notifyUser("Cliente salvo com sucesso!", "green", "mdi-check-circle");
+      dialogNew.value = false;
+      getClients();
+    }
+
+    function onFail() {
+      notifyUser("Erro ao salvar cliente!", "red", "mdi-alert-circle");
+    }
+
     function notifyUser(text, color, icon) {
       snackbar.value.visible = true;
       snackbar.value.text = text;
@@ -92,20 +140,39 @@ export default defineComponent({
     }
 
     function editItem(item) {
-      console.log(item)
+
+      selectedClientEdit.value = {...item};
+      console.log(selectedClientEdit.value)
       dialogEdit.value = true
     }
 
     function deleteItem(item) {
-      console.log(item)
+      selectedClient.value = item;
+      dialogDelete.value = true;
     }
 
     function closeDelete() {
       dialogDelete.value = false
     }
     function deleteItemConfirm(item) {
-      console.log(item)
+      if (!selectedClient.value.id) return;
+      loading.value = true;
+      apiService
+        .deleteClient(selectedClient.value.id)
+        .then(() => {
+          notifyUser("Cliente deletado com sucesso!", "green", "mdi-check-circle");
+          getClients();
+        })
+        .catch((err) => {
+          notifyUser("Erro ao deletar cliente!", "red", "mdi-alert-circle");
+          console.error(err);
+        })
+        .finally(() => {
+          dialogDelete.value = false;
+          loading.value = false;
+        });  
     }
+
     function getClients() {
       loading.value = true
       apiService.getClients().then((resp) => {
@@ -123,7 +190,7 @@ export default defineComponent({
     return {
       headers,
       clients,
-      dialog,
+      dialogNew,
       dialogEdit,
       dialogDelete,
       notifyUser,
@@ -132,7 +199,15 @@ export default defineComponent({
       closeDelete,
       deleteItemConfirm,
       snackbar,
-      getClients
+      getClients,
+      openDialog,
+      onSaved,
+      onFail,
+      loading,
+      selectedClient,
+      selectedClientEdit,
+      onUpdated
+
     }
   }
 })
