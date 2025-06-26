@@ -15,6 +15,7 @@ router = APIRouter()
 @router.post('/', response_model=clients_schemas.clients,status_code=status.HTTP_201_CREATED)
 async def post_client(client: clients_schemas.clients,db:AsyncSession = Depends(get_session)):
     try:
+        
         new_client:clients_models = await clients_service.register_clients(client,db) 
         return new_client
     except IntegrityError:
@@ -59,12 +60,12 @@ async def get_client_by_id(key:int, db:AsyncSession = Depends(get_session),user_
             raise HTTPException(status_code=status.HTTP_404_NOT_FOUND,detail='cliente não encontrado.')
 
 #PUT client
-@router.put('/{client_id}',status_code=status.HTTP_202_ACCEPTED,response_model=clients_schemas.clients)
+@router.put('/{client_id}',status_code=status.HTTP_202_ACCEPTED)
 async def put_client(client_id: int, client:clients_schemas.clientsUpdate,db:AsyncSession = Depends(get_session),user_logged :users_models = Depends(get_current_user)):
     try:
         if user_logged:
-            client_update:clients_schemas.clientsUpdate = await clients_service.update_client(client_id,client,db)
-            return client_update
+           await clients_service.update_client(client_id,client,db)
+           
         else:
             raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED)
     except HTTPException as e:
@@ -78,7 +79,7 @@ async def put_client(client_id: int, client:clients_schemas.clientsUpdate,db:Asy
 
 #DELETE role
 @router.delete('/{client_id}',status_code=status.HTTP_202_ACCEPTED)
-async def delete_role(client_id:int,db:AsyncSession= Depends(get_session),user_logged :users_models = Depends(get_current_user)):
+async def delete_client(client_id:int,db:AsyncSession= Depends(get_session),user_logged :users_models = Depends(get_current_user)):
     try:
         if user_logged:
             await clients_service.drop_client(client_id,db)

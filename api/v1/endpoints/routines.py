@@ -134,7 +134,7 @@ async def get_routine_by_user(user_id:Optional[int], db:AsyncSession = Depends(g
             raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED,detail="Você não possui permissão para consultar esses dados.")
         else:
             raise HTTPException(status_code=status.HTTP_404_NOT_FOUND,detail='Usuário não encontrado.')
-        
+
 #PUT routines
 @router.put('/{routine_id}',status_code=status.HTTP_202_ACCEPTED)
 async def put_routines(routine_id:int,payload: routines_schemas.routinesUpdate,db:AsyncSession = Depends(get_session),user_logged :users_models = Depends(get_current_user)):
@@ -150,7 +150,9 @@ async def put_routines(routine_id:int,payload: routines_schemas.routinesUpdate,d
             raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail="Ocorreu um erro durante a solicitação.")
         else:
             raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED,detail="Você não possui permissão para consultar esses dados.")
-    
+
+
+
 #PUT COMPLETE    
 @router.put('/{routine_id}/complete',status_code=status.HTTP_202_ACCEPTED)
 async def put_routine_complete(routine_id:int,db:AsyncSession = Depends(get_session),user_logged :users_models = Depends(get_current_user)):

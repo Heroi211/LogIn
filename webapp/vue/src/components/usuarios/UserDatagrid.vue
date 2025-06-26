@@ -14,6 +14,11 @@
       </v-toolbar> -->
 
     </template>
+    <template v-slot:[`item.active`]="{ item }">
+      <v-icon color="green" v-if="item.active">mdi-check</v-icon>
+      <v-icon color="red"   v-else>mdi-close</v-icon>
+    </template>
+
     <template v-slot:[`item.actions`]="{ item }">
       <v-tooltip top color="blue">
         <template v-slot:activator="{ on }">
@@ -114,9 +119,9 @@ export default defineComponent({
     }
 
       function onUpdated(){
-      notifyUser("Cliente atualizado com sucesso!", "green", "mdi-check-circle");
+      notifyUser("Usuario atualizado com sucesso!", "green", "mdi-check-circle");
       dialogEdit.value = false;
-      getClients();
+      getUsers();
     }
 
     function deleteItem(item) {

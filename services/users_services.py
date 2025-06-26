@@ -70,28 +70,27 @@ async def select_user(id_user:int,db:AsyncSession) -> users_schemas.users:
         
         return user
 
-async def update_user(id_user:int,user:users_schemas.users_update,db:AsyncSession) -> users_schemas.users:
+async def update_user(id_user:int,user:users_schemas.users_updateForm,db:AsyncSession) -> bool:
     async with db as session:
         querie = select(users_models).filter(users_models.id == id_user,users_models.active==True)
         resultset = await session.execute(querie)
         user_up:users_schemas.users = resultset.scalars().unique().one_or_none()
         
         if user_up:
-            if user.name:
-                user_up.name = user.name
-            if user.email:
-                user_up.email = user.email
-            if user_up.active != user.active:
-                user_up.active = user.active
-            if user.password:
-                user_up.password = get_password_hash(user.password)
-            if user.phone:
-                user_up.phone = user.phone
-            if user.role_id:
-                user_up.role_id = user.role_id
+            if user["name"]:
+                user_up.name = user['name']
+            if user["email"]:
+                user_up.email = user['email']
+            if user['active'] is not None:
+                user_up.active = user['active']
+            if user['phone']:
+                user_up.phone = user['phone']
+            if user['cpf']:
+                user_up.cpf = user['cpf'] 
+            await session.commit() 
+            return True
+        return False
             
-            await session.commit()
-            return user_up
     
 async def drop_user(id_user:int, db:AsyncSession):
     async with db as session:

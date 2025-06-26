@@ -8,15 +8,17 @@
         <v-card-text>
           <v-container>
             <v-row>
-              <v-col cols="12" sm="6">
+                <v-col cols="12" sm="6">
                 <v-text-field
                   v-model="client.cnpj"
                   label="CNPJ"
                   :rules="[requiredRule, cnpjRule]"
                   placeholder="00.000.000/0000-00"
                   required
+                  @input="onCnpjInput"
+                  maxlength="18"
                 />
-              </v-col>
+                </v-col>
               <v-col cols="12" sm="6">
                 <v-text-field
                   v-model="client.razao_social"
@@ -82,14 +84,23 @@ export default defineComponent({
       emit('close');
     }
 
+    function formatCNPJ(value) {
+      const digits = value.replace(/\D/g, '').slice(0, 14);
+      if (digits.length <= 2) return digits;
+      if (digits.length <= 5) return `${digits.slice(0,2)}.${digits.slice(2)}`;
+      if (digits.length <= 8) return `${digits.slice(0,2)}.${digits.slice(2,5)}.${digits.slice(5)}`;
+      if (digits.length <= 12) return `${digits.slice(0,2)}.${digits.slice(2,5)}.${digits.slice(5,8)}/${digits.slice(8)}`;
+      return `${digits.slice(0,2)}.${digits.slice(2,5)}.${digits.slice(5,8)}/${digits.slice(8,12)}-${digits.slice(12)}`;
+    }
+    function onCnpjInput(e) {
+      client.value.cnpj = formatCNPJ(e.target.value);
+    }
+
     async function save() {
       try {
-        await apiService.createClient({
-          cnpj: client.value.cnpj,
-          razao_social: client.value.razao_social,
-            email: client.value.email,
-            phone: client.value.phone
-        });
+        client.value.cnpj = client.value.cnpj.replace(/\D/g, ''); // Remove non-numeric characters
+        console.log('Saving client:', client.value);
+        await apiService.createClient(client.value);
         emit('saved');
         emit('close');
       } catch (err) {
@@ -98,7 +109,7 @@ export default defineComponent({
       }
     }
 
-    return { dialog, client, formRef, requiredRule, cnpjRule, canSave, close, save };
+    return { dialog, client, formRef, requiredRule, cnpjRule, canSave, close, save,onCnpjInput, formatCNPJ };
   }
 });
 </script>

@@ -1,5 +1,6 @@
 import axios from "axios";
-import { useAppStore } from "@/stores/app"; // Importa sua store global
+import { useAppStore } from "@/stores/app"; 
+import { AutoExportLoaders } from "unplugin-vue-router";
 
 const api = axios.create({
   baseURL: process.env.VUE_APP_API_BASEURL || "http://localhost:8000/v1",
@@ -107,7 +108,11 @@ const ApiService = {
                         .then(r => r.data),
   updateRoutine : (id,payload) => api.put(`/routines/${id}`,payload)
                         .then(r => r.data),
-
+  deleteUser: id => api.delete(`/users/${id}`).then(r => r.data),
+  updateUser: (id, payload) => api.put(`/users/${id}`, payload).then(r => r.data),
+  deleteClient:(id) => api.delete(`/clients/${id}`).then(r => r.data),
+  createClient: (payload) => api.post("/clients", payload).then(r => r.data),
+  updateClient: (id, payload) => api.put(`/clients/${id}`, payload).then(r => r.data),
 
 };
 export default ApiService;

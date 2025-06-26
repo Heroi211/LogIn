@@ -10,7 +10,8 @@ async def register_clients(client:clients_schemas.clients,db:AsyncSession) -> cl
     async with db as session:
         new_client = clients_models(cnpj=client.cnpj,
                                     razao_social=client.razao_social,
-                                    email=client.email,phone=client.phone)
+                                    email=client.email,
+                                    phone=client.phone)
         session.add(new_client)
         await session.commit()
         await session.refresh(new_client)
@@ -62,7 +63,7 @@ async def select_client_by_email(email:str, db:AsyncSession) -> clients_schemas.
         client:clients_schemas.clients = resultset.scalars().unique().first()
         return client
 
-async def update_client(id_client:int,client:clients_schemas.clientsUpdate,db:AsyncSession) -> clients_schemas.clients:
+async def update_client(id_client:int,client:clients_schemas.clientsUpdate,db:AsyncSession) -> bool:
     async with db as session:
         querie = select(clients_models).filter(clients_models.id==id_client,clients_models.active == True)
         resultset = await session.execute(querie)
@@ -79,8 +80,8 @@ async def update_client(id_client:int,client:clients_schemas.clientsUpdate,db:As
                 client_up.phone = client.phone
             await session.commit()
             await session.refresh(client_up)
-            return client
-        return None
+            return True
+        return False
 
 async def drop_client(id_client:int,db:AsyncSession) -> clients_schemas.clients:
     async with db as session:
