@@ -14,7 +14,17 @@ import { fileURLToPath, URL } from 'node:url'
 // https://vitejs.dev/config/
 export default defineConfig({
   plugins: [
-    VueRouter(),
+    VueRouter({
+      dirs:['./src/pages'],
+      vueRouterImportMode: 'async',
+      dts: './src/vue-router.d.ts',
+      extendRoute(route) {
+        if (route.path === '/')
+          route.meta.layout = 'default'
+        return route
+      },
+
+    }),
     Layouts(),
     Vue({
       template: { transformAssetUrls }

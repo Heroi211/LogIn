@@ -1,6 +1,5 @@
 import axios from "axios";
 import { useAppStore } from "@/stores/app"; 
-import { AutoExportLoaders } from "unplugin-vue-router";
 
 const api = axios.create({
   baseURL: process.env.VUE_APP_API_BASEURL || "http://localhost:8000/v1",
