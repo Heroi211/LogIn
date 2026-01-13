@@ -1,9 +1,10 @@
-from core.configs import settings
+# Description: Arquivo de modelagem da tabela de log de alterações de usuários.
 from sqlalchemy import Column,Integer,String,DateTime,ForeignKey,Boolean
 from sqlalchemy.orm import relationship
 import datetime
+from core.generic import modelsGeneric
 
-class Users_update(settings.DB_BaseModel):
+class Users_update(modelsGeneric):
     __tablename__=('users_update')
     id = Column(Integer,primary_key=True,autoincrement=True)
     updated_at = Column(DateTime,default=datetime.datetime.now(),nullable=False)

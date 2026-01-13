@@ -1,22 +1,26 @@
 from sqlalchemy import Column,Integer, String, Boolean,Date,ForeignKey,Null,DateTime
 from sqlalchemy.orm import relationship
-from core.configs import settings
-#from pydantic import EmailStr, use no schema e não no model
-import datetime
+from core.generic import modelsGeneric
 
-class Users(settings.DB_BaseModel):
+class Users(modelsGeneric):
     __tablename__ = 'users'
     id = Column(Integer,autoincrement=True,primary_key=True)
     password = Column(String(255),nullable=False)
     name = Column(String(50),nullable=False)
     email = Column(String(50),nullable=False)
-    CPF = Column(String(12), unique=True,nullable=False)
-    created_at = Column(DateTime,default=datetime.datetime.now())
+    phone = Column(String(12),nullable=False)
+    cpf = Column(String(12), unique=True,nullable=False)
     role_id = Column(Integer,ForeignKey('roles.id'),default=1)
-    active = Column(Boolean,default=True)
+    reset_password_token = Column(String(255),nullable=True)
+    reset_password_expires = Column(DateTime,nullable=True)
+ 
     
-    #relação da FK pra apontar o relacionamento de role para usuario. 1xN
-    role = relationship("Roles",lazy='joined')
+    #relação da FK pra apontar o relacionamento de role para usuario
+    role = relationship("Roles",lazy='joined',back_populates='user')
+    
+    # Relação reversa para rotinas
+    routine = relationship("Routines", back_populates="user")
+    user_clients = relationship("Users_Clients", back_populates="user")
     
     
  

@@ -1,0 +1,7 @@
+.bg-custom {
+  background-color: #1e2963 !important;
+}
+
+.expired-row {
+  background-color: rgba(255, 0, 0, 0.1) !important;
+}

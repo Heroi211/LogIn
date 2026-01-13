@@ -29,6 +29,19 @@ services:
     networks:
       - nwlogin
 
+  pgadmin:
+    build:
+      dockerfile: ./docker/pgadmin.dockerfile
+      context: .
+    image: pgadmin_db:v1
+    container_name: pgadmin_db
+    ports:
+      - 5050:80
+    depends_on:
+      - db_login
+    networks:
+      - nwlogin
+
 networks:
   nwlogin:
     name: "nwlogin"

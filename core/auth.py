@@ -12,10 +12,10 @@ from pytz import timezone as TZ
 
 oauth2_scheme = OAuth2PasswordBearer(tokenUrl=f"{settings.PROJECT_VERSION}/users/login")
 
-async def authenticate_user(CPF:str,password:str, db:AsyncSession) -> Optional[users_models]:
+async def authenticate_user(cpf:str,password:str, db:AsyncSession) -> Optional[users_models]:
     
     async with db as session:
-        querie = select(users_models).filter(users_models.CPF == CPF)
+        querie = select(users_models).filter(users_models.cpf == cpf)
         resultset = await session.execute(querie)
         user:users_models = resultset.scalars().unique().one_or_none()
         
