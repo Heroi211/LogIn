@@ -1,0 +1,29 @@
+from sqlalchemy import Column, Integer, String
+from sqlalchemy.orm import relationship
+
+from core.generic import modelsGeneric
+
+
+class Roles(modelsGeneric):
+    OPERATOR = 1
+    ADMINISTRATOR = 2
+
+    ROLES = [
+        (OPERATOR, "Operador"),
+        (ADMINISTRATOR, "Administrador"),
+    ]
+
+    __tablename__ = "roles"
+    id = Column(Integer, primary_key=True, autoincrement=True)
+    description = Column(String, nullable=False)
+
+    user = relationship("Users", uselist=False, back_populates="role")
+
+    def __init__(self, description):
+        self.description = description
+
+    def get_role_display(self) -> str:
+        for code, label in self.ROLES:
+            if code == self.id:
+                return label
+        return "Role inválida"

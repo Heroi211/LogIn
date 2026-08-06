@@ -169,9 +169,11 @@ yarn-debug.log*
 yarn-error.log*
 
 # Logs
-logs
+logs/**
+!logs/**/.gitkeep
+reports/maintenance/**
+!reports/**/.gitkeep
 *.log
-logs/*.log
 
 # Diretórios de build
 dist/

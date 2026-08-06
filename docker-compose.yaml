@@ -7,6 +7,10 @@ services:
       context: .
     image: login_database:v1
     container_name: database_login
+    environment:
+      POSTGRES_USER: ${DATABASE_USER:-hero}
+      POSTGRES_PASSWORD: ${DATABASE_PASS:-changeme}
+      POSTGRES_DB: ${DATABASE_NAME:-login}
     ports:
       - 5432:5432
     networks:
@@ -14,6 +18,11 @@ services:
     volumes:
       - pgdata:/var/lib/postgresql/data/
       - ./init_db:/docker-entrypoint-initdb.d/
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${DATABASE_USER:-hero} -d ${DATABASE_NAME:-login}"]
+      interval: 5s
+      timeout: 5s
+      retries: 10
 
   api_login:
     build:
@@ -21,13 +30,21 @@ services:
       context: .
     image: login_api:v1
     container_name: api_login
-    command: sh -c "python main.py"
+    env_file:
+      - .env
+    environment:
+      DATABASE_SERVER: db_login
+      ENVIRONMENT: ${ENVIRONMENT:-production}
     depends_on:
-      - db_login
+      db_login:
+        condition: service_healthy
     ports:
       - 8000:8000
     networks:
       - nwlogin
+    volumes:
+      - ./logs:/var/www/logs
+      - ./reports:/var/www/reports
 
   pgadmin:
     build:
@@ -35,6 +52,9 @@ services:
       context: .
     image: pgadmin_db:v1
     container_name: pgadmin_db
+    environment:
+      PGADMIN_DEFAULT_EMAIL: ${PGADMIN_EMAIL:-admin@example.com}
+      PGADMIN_DEFAULT_PASSWORD: ${PGADMIN_PASSWORD:-changeme}
     ports:
       - 5050:80
     depends_on:
