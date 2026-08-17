@@ -3,43 +3,51 @@ CREATE TABLE public.roles (
 	id serial4 NOT NULL,
 	description varchar NOT NULL,
 	active bool NOT NULL,
+	created_at timestamp NOT NULL DEFAULT now(),
 	CONSTRAINT roles_pkey PRIMARY KEY (id)
 );
 
 CREATE TABLE public.users (
 	id serial4 NOT NULL,
-	"password" varchar(255) NOT NULL,
-	"name" varchar(50) NOT NULL,
+	password varchar(255) NOT NULL,
+	name varchar(50) NOT NULL,
 	email varchar(50) NOT NULL,
-	"CPF" varchar(12) NOT NULL,
-	created_at timestamp NULL,
+	phone varchar(12) NOT NULL,
+	cpf varchar(12) NOT NULL,
 	role_id int4 NULL,
-	active bool NULL,
-	CONSTRAINT "users_CPF_key" UNIQUE ("CPF"),
+	reset_password_token varchar(255) NULL,
+	reset_password_expires timestamp NULL,
+	active bool NOT NULL DEFAULT true,
+	created_at timestamp NOT NULL DEFAULT now(),
+	CONSTRAINT users_cpf_key UNIQUE (cpf),
 	CONSTRAINT users_pkey PRIMARY KEY (id)
 );
 
-CREATE TABLE public.users_update (
-	id serial4 NOT NULL,
-	updated_at timestamp NOT NULL,
-	user_id int4 NULL,
-	user_password varchar NULL,
-	user_name varchar NULL,
-	user_email varchar NULL,
-	"user_CPF" varchar NOT NULL,
-	role_changed int4 NULL,
-	active_changed bool NULL,
-	user_changer int4 NULL,
-	CONSTRAINT users_update_pkey PRIMARY KEY (id),
-	CONSTRAINT "users_update_user_CPF_key" UNIQUE ("user_CPF")
+INSERT INTO public.roles (description, active) VALUES
+	('User', true),
+	('Operator', true),
+	('Administrator', true);
+
+ALTER TABLE public.users
+	ADD CONSTRAINT users_role_id_fkey FOREIGN KEY (role_id) REFERENCES public.roles(id);
+
+CREATE TABLE public.audit_events (
+	id bigserial NOT NULL,
+	created_at timestamp NOT NULL DEFAULT now(),
+	active bool NOT NULL DEFAULT true,
+	request_id varchar(36) NULL,
+	actor_user_id int4 NULL,
+	action varchar(100) NOT NULL,
+	resource_type varchar(50) NULL,
+	resource_id varchar(100) NULL,
+	outcome varchar(20) NOT NULL,
+	ip_address varchar(45) NULL,
+	event_metadata jsonb NULL,
+	CONSTRAINT audit_events_pkey PRIMARY KEY (id),
+	CONSTRAINT audit_events_actor_user_id_fkey FOREIGN KEY (actor_user_id) REFERENCES public.users(id)
 );
 
-INSERT INTO public.roles (description,active) VALUES
-	 ('User',true),
-	 ('Operator',true),
-	 ('Administrator',true);
-
-ALTER TABLE public.users ADD CONSTRAINT users_role_id_fkey FOREIGN KEY (role_id) REFERENCES public.roles(id);
-ALTER TABLE public.users_update ADD CONSTRAINT users_update_role_changed_fkey FOREIGN KEY (role_changed) REFERENCES public.roles(id);
-ALTER TABLE public.users_update ADD CONSTRAINT users_update_user_changer_fkey FOREIGN KEY (user_changer) REFERENCES public.users(id);
-ALTER TABLE public.users_update ADD CONSTRAINT users_update_user_id_fkey FOREIGN KEY (user_id) REFERENCES public.users(id);
+CREATE INDEX audit_events_created_at_idx ON public.audit_events (created_at);
+CREATE INDEX audit_events_action_idx ON public.audit_events (action);
+CREATE INDEX audit_events_actor_user_id_idx ON public.audit_events (actor_user_id);
+CREATE INDEX audit_events_request_id_idx ON public.audit_events (request_id);

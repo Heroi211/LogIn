@@ -9,11 +9,11 @@ class Roles(modelsGeneric):
     USER_CLIENT = 4
 
     ROLES = [
-    (USER, 'Usuario'), # Usuário padrão, sem permissões especiais, mas que atua nas rotinas
-    (OPERATOR, 'Operador'), # Usuário com permissões para verificar o sistema e aprovar tarefas. 
-    (ADMINISTRATOR, 'Administrador'), # Administrador do sistema com poder total
-    (USER_CLIENT, 'Usuario_cliente'), # Usuário do sistema, que também é cliente, pode cadastrar rotinas para si e para outros clientes
-]
+        (USER, "Usuario"),
+        (OPERATOR, "Operador"),
+        (ADMINISTRATOR, "Administrador"),
+        (USER_CLIENT, "Usuario_cliente"),
+    ]
     __tablename__='roles'
     id = Column(Integer,primary_key=True,autoincrement=True)
     description = Column(String,nullable=False)

@@ -7,6 +7,12 @@ services:
       context: .
     image: login_database:v1
     container_name: database_login
+    env_file:
+      - .env
+    environment:
+      POSTGRES_USER: ${DATABASE_USER}
+      POSTGRES_PASSWORD: ${DATABASE_PASS}
+      POSTGRES_DB: ${DATABASE_NAME}
     ports:
       - 5432:5432
     networks:
@@ -22,12 +28,16 @@ services:
     image: login_api:v1
     container_name: api_login
     command: sh -c "python main.py"
+    env_file:
+      - .env
     depends_on:
       - db_login
     ports:
       - 8000:8000
     networks:
       - nwlogin
+    volumes:
+      - ./logs:/var/www/logs
 
   pgadmin:
     build:
@@ -35,6 +45,11 @@ services:
       context: .
     image: pgadmin_db:v1
     container_name: pgadmin_db
+    env_file:
+      - .env
+    environment:
+      PGADMIN_DEFAULT_EMAIL: ${PGADMIN_EMAIL}
+      PGADMIN_DEFAULT_PASSWORD: ${PGADMIN_PASSWORD}
     ports:
       - 5050:80
     depends_on:
