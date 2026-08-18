@@ -1,375 +1,324 @@
 # LogIn API
 
-Backend de **Identity & Access** (usuários, papéis, autenticação JWT, RBAC e auditoria).  
-Arquitetura: **Clean Architecture + DDD estratégico** (bounded context `identity_access`).
-
-Documentação detalhada de arquitetura: [`docs/architecture/`](docs/architecture/README.md).
+Backend **Identity & Access** — usuários, papéis, JWT, RBAC dinâmico e auditoria.  
+Arquitetura: Clean Architecture + DDD (`contexts/identity_access`).
 
 ---
 
-## Início rápido (5 minutos)
+## Sumário — onde está cada informação
 
-```bash
-cp .env-sample .env          # ajuste APP_BRAND_NAME, DATABASE_*, SECRET
-make install
-make dev                     # Docker: API + PostgreSQL + pgAdmin
-make health                  # verifica API + banco
+Use este mapa para se contextualizar **antes de implementar qualquer coisa**.  
+Leia na ordem indicada conforme o tipo de tarefa.
+
+### Documentação (leia primeiro)
+
+| Arquivo | Conteúdo | Quando consultar |
+|---------|----------|----------------|
+| **[`docs/FUNCTIONALITY_CATALOG.md`](docs/FUNCTIONALITY_CATALOG.md)** | Catálogo oficial: rotas, permissões, use cases, papéis seed, checklist de entrega | Saber **o que já existe**; atualizar ao entregar feature |
+| **[`docs/RBAC.md`](docs/RBAC.md)** | RBAC dinâmico: modelo DB, fluxo dev/ops, use case vs rota, cache, signup, refresh | **Permissionar** ou associar papéis |
+| **[`docs/SECURITY.md`](docs/SECURITY.md)** | Bloqueio, rate limit, CORS, reset de senha, checklist produção | Segurança e hardening |
+| **[`docs/TROUBLESHOOTING.md`](docs/TROUBLESHOOTING.md)** | Diagnóstico: login, 403, banco, correlation ID | Problemas em runtime |
+| **[`docs/architecture/golden_rules.md`](docs/architecture/golden_rules.md)** | Checklist de camadas — o que pode/não pode em domain, application, etc. | **Code review** e conformidade |
+| **[`docs/architecture/README.md`](docs/architecture/README.md)** | Visão geral Clean Architecture + bounded contexts | Entender estrutura macro |
+| **[`docs/architecture/identity_access/public_api.md`](docs/architecture/identity_access/public_api.md)** | Contratos entre bounded contexts (`UserId`, `AuthorizationService`) | Integrar **outro módulo** com Identity |
+| **[`docs/README.md`](docs/README.md)** | Índice da pasta `docs/` | Navegação |
+| **[`init_db/README.md`](init_db/README.md)** | Como o SQL é aplicado (Docker init, reset) | Banco / seed |
+| **[`.env-sample`](.env-sample)** | Variáveis de ambiente comentadas | Config local/staging/prod |
+| **[`AGENT_IMPLEMENTATION_PROMPT.md`](AGENT_IMPLEMENTATION_PROMPT.md)** | Prompt copy-paste para agentes de IA + fluxos obrigatórios | **Início de toda implementação via agente** |
+
+### Código — onde implementar (não inventar outro lugar)
+
+| Caminho | Responsabilidade | Exemplos no projeto |
+|---------|------------------|---------------------|
+| `contexts/identity_access/domain/` | Entidades, VOs, regras puras, `Permission`, exceções | `entities/user.py`, `permission.py` |
+| `contexts/identity_access/application/use_cases/` | Orquestração, auditoria, **autorização quando múltiplos entrypoints** | `users/authenticate_user.py` |
+| `contexts/identity_access/application/ports/` | Interfaces (Protocol) | `authorization_service.py`, `user_repository.py` |
+| `contexts/identity_access/infrastructure/persistence/` | ORM, repositórios, mappers | `repositories/`, `models/` |
+| `contexts/identity_access/infrastructure/security/` | JWT, RBAC HTTP, rate limit | `authorization.py`, `db_authorization_service.py` |
+| `contexts/identity_access/presentation/api/v1/endpoints/` | Rotas finas + `require_permission` | `users.py`, `roles.py`, `permissions.py` |
+| `contexts/identity_access/presentation/schemas/` | Pydantic (entrada/saída HTTP) | `users_schemas.py` |
+| `bootstrap/deps.py` | Injeção de dependências (composition root) | `get_*_use_case`, `get_authorization_service` |
+| `bootstrap/app.py` | FastAPI, middlewares, lifespan | CORS, correlation ID, métricas |
+| `init_db/database.sql` | **Única fonte** de schema + seed (sem migrations) | `permissions`, `role_permissions`, `roles` |
+| `core/configs.py` | Settings lidos do `.env` | JWT, RBAC cache, segurança |
+| `scripts/new_context.py` | Gerar novo bounded context | `make new-context NAME=x` |
+| `scripts/check_domain_imports.py` | Validar domain/ sem FastAPI/SQLAlchemy | `make check-arch` |
+| `contexts/_template/README.md` | Template para novo módulo | Novo bounded context |
+
+### Banco de dados (RBAC)
+
+| Tabela | Função |
+|--------|--------|
+| `permissions` | Catálogo de funcionalidades (`code` = ex. `users:read`) |
+| `role_permissions` | N:N papel ↔ permissão |
+| `roles` | Papéis (grupos de acesso) |
+| `users.role_id` | Papel do usuário — **herda permissões do papel** |
+
+Matriz papel→permissão **não está no código** (não existe `ROLE_PERMISSIONS`). Admin altera via `PUT /v1/roles/{id}/permissions`.
+
+---
+
+## Guia rápido para agentes de IA
+
+Ao receber uma tarefa de implementação, use **[`AGENT_IMPLEMENTATION_PROMPT.md`](AGENT_IMPLEMENTATION_PROMPT.md)** (prompt copy-paste) e siga esta ordem:
+
+### 1. Contextualizar (obrigatório)
+
+1. Ler [`docs/FUNCTIONALITY_CATALOG.md`](docs/FUNCTIONALITY_CATALOG.md) — não duplicar rotas/permissões existentes.
+2. Ler [`docs/RBAC.md`](docs/RBAC.md) se a tarefa envolve acesso, papéis ou novas telas.
+3. Ler [`docs/architecture/golden_rules.md`](docs/architecture/golden_rules.md) — respeitar camadas.
+
+### 2. Implementar nova feature (ordem correta)
+
+```
+Permissões (modulo:acao) → init_db ou POST /permissions
+    → use case em application/use_cases/
+    → port + repositório em infrastructure/ (se persistência nova)
+    → endpoint em presentation/ + require_permission(...)
+    → DI em bootstrap/deps.py
+    → atualizar docs/FUNCTIONALITY_CATALOG.md
 ```
 
-O banco é criado e populado por **`init_db/database.sql`**, montado no PostgreSQL via Docker (`docker-compose.yaml` → `/docker-entrypoint-initdb.d/`).  
-Isso roda **apenas no primeiro start** do volume. Para reaplicar do zero: `make docker-fresh`.
+### 3. Regras que **não** podem ser violadas
 
-**Admin inicial** (definido em `init_db/database.sql`):
+| ❌ Não fazer | ✅ Fazer |
+|-------------|----------|
+| Matriz RBAC no código Python | Associar permissões no banco (`role_permissions`) |
+| SQLAlchemy / FastAPI em `domain/` | Infra e presentation nas camadas corretas |
+| Lógica de negócio em endpoints | Use cases em `application/` |
+| Chamar repositório direto sem use case (mutação) | Use case + `AuthorizationService` quando necessário |
+| Permissão direta por usuário | Sempre via `users.role_id` → papel |
+| Migrations / Alembic | Alterar `init_db/database.sql` (+ `make docker-fresh` em dev) |
+| Esquecer de atualizar o catálogo | Sempre atualizar `FUNCTIONALITY_CATALOG.md` |
 
-| Campo | Valor padrão |
-|-------|----------------|
+### 4. Tarefa → documento principal
+
+| Tarefa | Ler |
+|--------|-----|
+| Nova rota / CRUD / módulo | `FUNCTIONALITY_CATALOG.md` + seção 4 deste README + `golden_rules.md` |
+| Permissão / papel / quem acessa o quê | `RBAC.md` |
+| Login, JWT, bloqueio, reset senha | `SECURITY.md` + catálogo (rotas auth) |
+| Novo bounded context | `contexts/_template/README.md` + `public_api.md` |
+| Bug / 403 / banco offline | `TROUBLESHOOTING.md` |
+| Variável de ambiente | `.env-sample` + `core/configs.py` |
+
+### 5. Arquivos-chave do RBAC (referência rápida)
+
+```
+require_permission(...)     → infrastructure/security/authorization.py
+Consulta banco + cache      → infrastructure/security/db_authorization_service.py
+Catálogo SQL                → init_db/database.sql (tabelas permissions, role_permissions)
+Constantes de referência    → domain/permission.py (não é matriz de acesso)
+JWT / usuário logado        → infrastructure/security/deps.py
+```
+
+---
+
+## Manual de uso (fluxos)
+
+## 1. Subir o ambiente
+
+```bash
+cp .env-sample .env
+make install
+make dev          # Docker: API + PostgreSQL + pgAdmin
+make health       # GET /health e /health/ready
+```
+
+- Schema + seed: `init_db/database.sql` (primeiro start do volume Docker)
+- Reset total do banco: `make docker-fresh`
+- API local: `make run` → http://localhost:8000/docs
+
+**Admin inicial** (`init_db/database.sql`):
+
+| Campo | Valor |
+|-------|-------|
 | CPF | `00000000000` |
 | Senha | `Admin@123456` |
 | E-mail | `admin@example.com` |
 
-API local sem Docker (PostgreSQL já existente):
+---
 
-```bash
-make run                     # http://localhost:8000/docs
+## 2. Fluxo: autenticar
+
 ```
+1. POST /v1/users/login     (CPF + senha, form OAuth2)
+   ← access_token, refresh_token, token_type
 
-Nesse caso, aplique `init_db/database.sql` manualmente no seu banco ou use `make docker-fresh`.
+2. Requisições protegidas:
+   Header: Authorization: Bearer <access_token>
 
-### Health
+3. Token expirado:
+   POST /v1/users/refresh?refresh_token=<token>
 
-| Rota | Uso |
-|------|-----|
-| `GET /health` | Liveness (API viva) |
-| `GET /health/ready` | Readiness (API + PostgreSQL) |
-| `GET /metrics` | Métricas básicas (Prometheus-style) |
+4. Dados do usuário logado:
+   GET /v1/users/logged
 
-### Perfis (`APP_ENV`)
-
-| Perfil | Uso |
-|--------|-----|
-| `development` | Local, debug opcional |
-| `staging` | Pré-produção |
-| `production` | Secrets fortes, SMTP configurado |
+5. Permissões para o frontend (menus/botões):
+   GET /v1/users/me/permissions
+   ← {"permissions": ["users:read", ...]}
+```
 
 ---
 
-## Funcionalidades atuais
+## 3. Fluxo: gerenciar acesso (operacional / admin)
 
-### Autenticação
+RBAC é **dinâmico**: catálogo e matriz papel→permissão ficam no PostgreSQL.
 
-| Método | Rota | Auth | Descrição |
-|--------|------|------|-----------|
-| POST | `/v1/users/signup` | Pública | Cadastro de usuário |
-| POST | `/v1/users/login` | Pública | Login → access + refresh token |
-| GET | `/v1/users/logged` | JWT | Usuário autenticado |
-| GET | `/v1/users/me/permissions` | JWT | Permissões do usuário (telas/menus) |
-| POST | `/v1/users/refresh` | Pública | Renova tokens |
-| POST | `/v1/users/forgot-password/{email}` | Pública | Solicita reset por e-mail (máx. 3× / 30 dias) |
-| POST | `/v1/users/reset-password` | Pública | Redefine senha com token |
+```
+┌─ Catálogo de funcionalidades ─────────────────────────────┐
+│  GET  /v1/permissions/          (permissions:read)       │
+│  POST /v1/permissions/          (permissions:create)     │
+│       → registra code ex: "products:read"               │
+└─────────────────────────────────────────────────────────┘
+                          │
+                          ▼
+┌─ Papéis (grupos) ───────────────────────────────────────┐
+│  GET  /v1/roles/                (roles:read)            │
+│  POST /v1/roles/                (roles:create)          │
+│  PUT  /v1/roles/{id}/permissions (roles:update)         │
+│       → {"permissions": ["users:read", "products:read"]} │
+│       ⚠ substitui a lista inteira do papel              │
+└─────────────────────────────────────────────────────────┘
+                          │
+                          ▼
+┌─ Usuários ───────────────────────────────────────────────┐
+│  Cada usuário tem role_id → herda permissões do papel   │
+│  GET /v1/users/  PUT /v1/users/{id}  block/unblock       │
+└─────────────────────────────────────────────────────────┘
+```
 
-**Segurança (Fase B):** bloqueio após 3 logins falhos, rate limit em login/signup/forgot, token de reset hasheado no banco, CORS configurável. Detalhes: [`docs/SECURITY.md`](docs/SECURITY.md).
+**Papéis seed (IDs fixos):**
 
-### Usuários (RBAC)
-
-| Método | Rota | Permissão | Quem acessa hoje |
-|--------|------|-----------|------------------|
-| GET | `/v1/users/` | `users:read` | Operator, Administrator |
-| GET | `/v1/users/{id}` | `users:read` | Operator, Administrator |
-| PUT | `/v1/users/{id}` | `users:update` | Administrator |
-| DELETE | `/v1/users/{id}` | `users:delete` | Administrator |
-| POST | `/v1/users/{id}/block` | `users:block` | Administrator |
-| POST | `/v1/users/{id}/unblock` | `users:unblock` | Administrator |
-
-### Permissões e RBAC dinâmico
-
-| Método | Rota | Permissão | Descrição |
-|--------|------|-----------|-----------|
-| GET | `/v1/permissions/` | `permissions:read` | Catálogo de permissões |
-| POST | `/v1/permissions/` | `permissions:create` | Cadastrar nova permissão (tela/função) |
-| PUT | `/v1/roles/{id}/permissions` | `roles:update` | Associar permissões ao papel |
-
-Matriz **papel → permissão** no PostgreSQL (`permissions` + `role_permissions`).  
-Guia completo: [`docs/RBAC.md`](docs/RBAC.md).
-
-### Papéis (RBAC)
-
-| Método | Rota | Permissão | Quem acessa hoje |
-|--------|------|-----------|------------------|
-| POST | `/v1/roles/` | `roles:create` | Administrator |
-| GET | `/v1/roles/` | `roles:read` | Administrator |
-| GET | `/v1/roles/{id}` | `roles:read` | Administrator |
-| PUT | `/v1/roles/{id}` | `roles:update` | Administrator |
-| DELETE | `/v1/roles/{id}` | `roles:delete` | Administrator |
-
-### Papéis de usuário
-
-| ID | Papel | Permissões hoje |
-|----|-------|-----------------|
-| 1 | User | — |
+| ID | Papel | Seed |
+|----|-------|------|
+| 1 | User | sem permissões |
 | 2 | Operator | `users:read` |
-| 3 | Administrator | bypass total + todas no DB |
-| 4 | User_client | — |
+| 3 | Administrator | todas + bypass em código |
+| 4 | User_client | sem permissões |
 
-Permissões por papel: `GET /v1/roles/{id}` → campo `permissions`.
-
----
-
-## Fluxo do sistema
-
-### Requisição HTTP típica (rota protegida)
-
-```
-Cliente HTTP
-    │
-    ▼
-main.py → bootstrap/app.py          # FastAPI, CORS, middlewares
-    │
-    ▼
-presentation/api/v1/endpoints/        # Controller fino
-    │   require_permission(...)       # RBAC (infrastructure/security)
-    │   Depends(get_*_use_case)       # DI (bootstrap/deps.py)
-    ▼
-application/use_cases/                # Orquestração + auditoria
-    │
-    ▼
-domain/entities/                      # Regras de negócio (User, Role)
-    │
-    ▼
-infrastructure/persistence/           # SQLAlchemy repositories
-    │
-    ▼
-PostgreSQL
-```
-
-### Login
-
-```
-POST /v1/users/login (CPF + senha)
-    → AuthenticateUser (use case)
-        → UserRepository.get_by_cpf
-        → User.verify_password + User.ensure_can_authenticate
-        → AuditLogger (success/failure)
-    → TokenService.create_access_token
-    ← { access_token, token_type }
-```
-
-### Autorização (RBAC)
-
-1. JWT validado em `infrastructure/security/deps.py` → `get_current_user`
-2. `require_permission(Permission.XXX)` consulta `domain/rbac.py`
-3. **Administrator sempre passa** (bypass no domínio)
-4. Demais papéis: matriz `ROLE_PERMISSIONS` em `domain/permission.py`
+Detalhes: [`docs/RBAC.md`](docs/RBAC.md) · Catálogo completo: [`docs/FUNCTIONALITY_CATALOG.md`](docs/FUNCTIONALITY_CATALOG.md)
 
 ---
 
-## Estrutura do projeto
+## 4. Fluxo: implementar nova feature (desenvolvedor)
 
 ```
-LogIn/
-├── main.py                           # Entrypoint → bootstrap/app.create_app()
-├── bootstrap/                        # Composition root (app, DI, sessão DB)
-├── contexts/
-│   ├── identity_access/              # Bounded context ativo
-│   │   ├── domain/                   # Entidades, VOs, Permission, RBAC
-│   │   ├── application/              # Use cases, ports, DTOs
-│   │   ├── infrastructure/           # ORM, JWT, SMTP, audit, RBAC HTTP
-│   │   └── presentation/             # Endpoints FastAPI + schemas Pydantic
-│   └── ticket_management/            # Placeholder (futuro)
-├── core/                             # Config, logging, bcrypt (cross-cutting)
-├── shared/                           # Utilitários sem regra de negócio
-├── docs/architecture/                # Documentação arquitetural
-├── init_db/                          # SQL: schema + dados iniciais (Docker init)
-├── Makefile
-└── docker-compose.yaml
+1. Definir permissões por ação
+   Ex: products:read, products:create, products:update, products:delete
+
+2. Registrar no catálogo (banco)
+   POST /v1/permissions  ou  init_db/database.sql
+
+3. Atualizar docs/FUNCTIONALITY_CATALOG.md
+
+4. Criar use case(s) em application/use_cases/
+   → receber actor_role_id; checar AuthorizationService quando necessário
+
+5. Criar rotas em presentation/api/v1/endpoints/
+   → require_permission("products:read") por endpoint
+
+6. Registrar DI em bootstrap/deps.py
+
+7. Associar permissões aos papéis (admin)
+   PUT /v1/roles/{id}/permissions
+
+8. Frontend: GET /v1/users/me/permissions
+```
+
+**Regra:** rota protege a entrada HTTP; **use case** protege a regra de negócio quando há mais de um caminho até o repositório. Não chamar repositório direto sem autorização.
+
+Novo bounded context: `make new-context NAME=meu_modulo` · Validar camadas: `make check-arch`
+
+---
+
+## 5. Fluxo: requisição HTTP protegida
+
+```
+Cliente
+  → middleware (correlation ID, métricas, access log)
+  → endpoint + require_permission("modulo:acao")
+  → get_current_user (JWT)
+  → DbAuthorizationService → role_permissions (PostgreSQL)
+  → use case → domínio → repositório → PostgreSQL
 ```
 
 ---
 
-## Guia: próximas implementações
+## 6. Referência rápida de rotas
 
-### Nova rota / endpoint
+Consulte o catálogo completo em [`docs/FUNCTIONALITY_CATALOG.md`](docs/FUNCTIONALITY_CATALOG.md).
 
-1. **Schema** (entrada/saída HTTP):  
-   `contexts/identity_access/presentation/schemas/`
-
-2. **Use case** (fluxo de negócio):  
-   `contexts/identity_access/application/use_cases/<recurso>/`
-
-3. **Registrar DI** em `bootstrap/deps.py`:
-   ```python
-   def get_meu_use_case(...) -> MeuUseCase:
-       return MeuUseCase(repo, audit)
-   ```
-
-4. **Endpoint fino** em `presentation/api/v1/endpoints/`:
-   ```python
-   @router.post("/recurso")
-   async def criar(
-       request: Request,
-       payload: meu_schema,
-       use_case: Annotated[MeuUseCase, Depends(get_meu_use_case)],
-       _: Annotated[User, Depends(require_permission(Permission.XXX))],
-   ):
-       audit_ctx = audit_context_from_request(request, actor_user_id=...)
-       result = await use_case.execute(..., audit_ctx)
-       return mapper_to_response(result)
-   ```
-
-5. **Registrar router** em `presentation/api/v1/api.py` se for módulo novo.
+| Grupo | Exemplos |
+|-------|----------|
+| Auth | login, refresh, signup, forgot/reset password |
+| Usuários | CRUD, block/unblock, me/permissions |
+| Papéis | CRUD, PUT …/permissions |
+| Permissões | GET/POST catálogo |
+| Ops | /health, /health/ready, /metrics |
 
 ---
 
-### Aplicar permissão por papel
+## 7. Variáveis de ambiente
 
-**Rotas novas declaram o que precisam** — não listam papéis:
-
-```python
-from contexts.identity_access.domain.permission import Permission
-from contexts.identity_access.infrastructure.security.authorization import require_permission
-
-@router.get("/")
-async def listar(_: Annotated[User, Depends(require_permission(Permission.USERS_READ))]):
-    ...
-```
-
-**Quem pode fica na matriz** (`domain/permission.py`):
-
-```python
-ROLE_PERMISSIONS = {
-    RoleType.OPERATOR: frozenset({
-        Permission.USERS_READ,
-        Permission.USERS_CREATE,  # ← adicionar aqui para liberar Operator
-    }),
-    ...
-}
-```
-
-Se precisar de permissão nova:
-
-1. Adicionar constante em `class Permission`
-2. Incluir em `ALL_PERMISSIONS`
-3. Atribuir em `ROLE_PERMISSIONS`
-4. Usar `require_permission(Permission.NOVA)` na rota
-
----
-
-### Registrar log de auditoria
-
-Auditoria de negócio/segurança vai nos **use cases**, não nos endpoints.
-
-1. Injetar `AuditLogger` no use case (via `bootstrap/deps.py` → `get_audit_logger`)
-2. Usar helper `application/use_cases/_audit.py`:
-
-```python
-from contexts.identity_access.domain.audit.actions import AuditAction
-from contexts.identity_access.application.use_cases._audit import record_audit
-
-await record_audit(
-    self._audit,
-    audit_ctx,
-    action=AuditAction.USER_CREATED,
-    outcome="success",
-    resource_type="user",
-    resource_id=user.id.value,
-)
-```
-
-3. No endpoint, passar contexto HTTP:
-
-```python
-from contexts.identity_access.infrastructure.http.audit_context import audit_context_from_request
-
-audit_ctx = audit_context_from_request(request, actor_user_id=actor.id.value)
-await use_case.execute(..., audit_ctx)
-```
-
-**Log HTTP** (access log): automático via middleware em `core/middleware/request_record.py`.  
-Configure `LOG_HTTP_REQUESTS` e `LOG_HTTP_REQUESTS_FILE` no `.env`.
-
----
-
-### Aplicar DDD / Clean Architecture
-
-| O quê | Onde colocar |
-|-------|--------------|
-| Regra de negócio | `domain/entities/`, `domain/value_objects/` |
-| Orquestração de fluxo | `application/use_cases/` |
-| Interface de persistência | `application/ports/` |
-| SQLAlchemy, SMTP, JWT | `infrastructure/` |
-| HTTP, Pydantic | `presentation/` |
-| Wiring / DI | `bootstrap/deps.py` |
-
-**Regra de dependência:** camadas externas dependem das internas. `domain/` **não** importa FastAPI, SQLAlchemy ou Pydantic.
-
-**Novo agregado (ex.: Ticket):** criar bounded context em `contexts/ticket_management/` — não importar ORM de users; usar `UserId` de `domain/public_api.py`.
-
----
-
-### Novo repositório
-
-1. Port em `application/ports/meu_repository.py` (Protocol)
-2. Implementação em `infrastructure/persistence/repositories/`
-3. Mapper ORM ↔ domínio em `infrastructure/persistence/mappers.py`
-4. Factory em `bootstrap/deps.py`
-
----
-
-### Nova invariante de domínio
-
-Adicionar método na entidade (`domain/entities/user.py`) e chamar no use case:
-
-```python
-# domain
-def ensure_can_authenticate(self) -> None:
-    if not self.active:
-        raise UserInactiveError("Usuário inativo.")
-
-# use case
-user.verify_password(senha, self._hasher.verify)
-```
-
----
-
-## Variáveis de ambiente
-
-Copie `.env-sample` para `.env`. Principais:
+Copie `.env-sample` → `.env`.
 
 | Variável | Uso |
 |----------|-----|
-| `SECRET` | JWT + app |
+| `SECRET` | JWT |
 | `DATABASE_*` | PostgreSQL |
-| `SMTP_*` | E-mail de reset de senha |
-| `FRONTEND_URL` | Link no e-mail de reset |
-| `CORS_ORIGINS` | Origens permitidas (vírgula ou `*`) |
-| `LOGIN_MAX_FAILED_ATTEMPTS` | Bloqueio após N logins falhos (padrão: 3) |
-| `PASSWORD_RESET_MAX_REQUESTS` | Máx. resets por janela (padrão: 3) |
-| `PASSWORD_RESET_WINDOW_DAYS` | Janela em dias (padrão: 30) |
-| `PASSWORD_MIN_LENGTH` | Tamanho mínimo da senha (padrão: 8) |
-| `RATE_LIMIT_*_PER_MINUTE` | Rate limit por IP (login, signup, forgot) |
-| `LOG_HTTP_REQUESTS` | Access log no console |
-| `LOG_HTTP_REQUESTS_FILE` | Gravar JSONL (`logs/api_requests/`) |
+| `SIGNUP_PUBLIC` | Cadastro aberto (`true`) ou exige `users:create` |
+| `REFRESH_TOKEN_EXPIRE_DAYS` | Validade do refresh token |
+| `CORS_ORIGINS` | Origens permitidas |
+| `LOGIN_MAX_FAILED_ATTEMPTS` | Bloqueio por login (padrão 3) |
+| `PASSWORD_RESET_*` | Limite de reset de senha |
+| `PERMISSION_CACHE_TTL_SECONDS` | Cache RBAC por papel |
+| `LOG_FORMAT` | `text` ou `json` |
+| `METRICS_ENABLED` | Middleware de métricas |
+
+Lista completa: `.env-sample`
 
 ---
 
-## Próximos passos (quando retomar)
+## 8. Estrutura do projeto
 
-| Fase | Foco |
-|------|------|
-| **A–B** | ✅ Fundação + segurança |
-| **RBAC dinâmico** | ✅ Permissões no DB + API de gestão |
-| **C** | ✅ Observabilidade (correlation ID, metrics, JSON logs, shutdown) |
-| **D** | ✅ Template BC + `new_context.py` + `make check-arch` |
-| **E** | ✅ Signup configurável + refresh token + [`docs/RBAC.md`](docs/RBAC.md) |
-| **F** | Testes automatizados + CI |
-| **G** | Empacotamento template GitHub |
-| **H** | Integrações plug-and-play |
+```
+LogIn/
+├── bootstrap/              # app, DI, sessão
+├── contexts/
+│   └── identity_access/    # domain → application → infrastructure → presentation
+├── core/                   # config, logging, middleware
+├── docs/                   # catálogo, RBAC, segurança
+├── init_db/                # database.sql (schema + seed)
+├── scripts/                # new_context.py, check_domain_imports.py
+└── main.py
+```
 
 ---
 
-## Referências
+## 9. Comandos úteis
 
-- [Arquitetura geral](docs/architecture/README.md)
-- [Identity & Access (contexto)](docs/architecture/identity_access/README.md)
-- [API pública entre contextos](docs/architecture/identity_access/public_api.md)
-- [Context map](docs/architecture/identity_access/context_map.md)
-- [Regras de ouro (checklist)](docs/architecture/golden_rules.md)
+| Comando | Ação |
+|---------|------|
+| `make dev` | Stack Docker com hot reload |
+| `make run` | API local (uvicorn) |
+| `make health` | Testa health endpoints |
+| `make docker-fresh` | Apaga volume e reaplica SQL |
+| `make new-context NAME=x` | Gera bounded context template |
+| `make check-arch` | Valida imports proibidos em domain/ |
+
+---
+
+## 10. Status das fases
+
+| Fase | Status |
+|------|--------|
+| A — Fundação (env, Docker, health) | ✅ |
+| B — Segurança (bloqueio, rate limit, CORS) | ✅ |
+| RBAC dinâmico (permissions + role_permissions) | ✅ |
+| C — Observabilidade | ✅ |
+| D — Template bounded context | ✅ |
+| E — Signup configurável + refresh token | ✅ |
+| F — Testes + CI | Pendente |
+| G — Template GitHub | Pendente |
+| H — Integrações plug-and-play | Pendente |

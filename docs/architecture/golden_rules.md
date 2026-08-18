@@ -24,26 +24,25 @@ Use este checklist em code review e antes de merge.
 ## Apresentação (`contexts/*/presentation/`)
 
 - [ ] Endpoints finos: validar HTTP → chamar use case → mapear resposta
+- [ ] Mutação sensível: `require_permission(...)` na rota; use case + `AuthorizationService` se houver múltiplos entrypoints
 - [ ] Sem `db.add()`, `db.commit()` ou `select()` em endpoints (meta Fase 3)
 - [ ] Schemas Pydantic só na borda HTTP — não vazam para domínio
 
 ## Geral
 
 - [ ] Dependências apontam para dentro (regra de dependência da Clean Architecture)
-- [ ] Novo papel/permissão: alterar `ROLE_PERMISSIONS` no domínio — rotas intactas
+- [ ] Novo papel/permissão: cadastrar em `permissions` + associar via `PUT /v1/roles/{id}/permissions` — rotas intactas (ver `docs/RBAC.md`)
 - [ ] Administrator sempre autorizado via política centralizada
 - [ ] Contexto Ticket não importa `models.users` — usa `UserId` / port
 - [ ] Eventos de auditoria registrados nos use cases críticos (Fase 5)
+- [ ] Feature nova documentada em `docs/FUNCTIONALITY_CATALOG.md`
 
 ## Comandos úteis (verificação manual)
 
 ```bash
-# SQLAlchemy fora de infrastructure
-rg "from sqlalchemy|import sqlalchemy" --glob "*.py" \
-  --glob "!contexts/*/infrastructure/**" \
-  --glob "!core/**"
+make check-arch   # preferido — scripts/check_domain_imports.py
 
-# Domínio limpo
+# Domínio limpo (manual)
 rg "fastapi|sqlalchemy|pydantic" contexts/*/domain/
 ```
 
