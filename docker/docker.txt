@@ -1,4 +1,4 @@
-Stack backend (API + PostgreSQL + pgAdmin)
+Stack backend (API + PostgreSQL + pgAdmin) — projeto gestao_tickets
 
 Subir tudo:
   make up
@@ -7,12 +7,17 @@ Reset completo (volumes + rebuild):
   make docker-fresh
 
 Build manual (alternativa):
-  docker build -f docker/db.dockerfile -t login_database:v1 .
-  docker build -f docker/api.dockerfile -t login_api:v1 .
-  docker build -f docker/pgadmin.dockerfile -t pgadmin_db:v1 .
+  docker build -f docker/db.dockerfile -t gestao_tickets_database:v1 .
+  docker build -f docker/api.dockerfile -t gestao_tickets_api:v1 .
+  docker build -f docker/pgadmin.dockerfile -t gestao_tickets_pgadmin:v1 .
 
 Ou:
   docker compose up --build
+
+Containers:
+  database_gt   PostgreSQL
+  api_gt        API FastAPI
+  pgadmin_gt    pgAdmin
 
 Endpoints:
   API:     http://localhost:8000/docs

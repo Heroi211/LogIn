@@ -15,8 +15,8 @@ help:
 	@echo "  make health         testa GET /health e /health/ready"
 	@echo "  make check-arch     valida imports proibidos em domain/"
 	@echo "  make new-context NAME=tickets  gera bounded context template"
-	@echo "  make up             stack Docker (API + DB; init_db no 1º up)"
-	@echo "  make dev            stack Docker com pgAdmin + hot reload"
+	@echo "  make up             stack Docker (API + DB + pgAdmin; init_db no 1º up)"
+	@echo "  make dev            stack Docker com hot reload (override dev)"
 	@echo "  make docker-fresh   reset total: volume DB + rebuild (reaplica init_db/)"
 	@echo "  make docker-down    para stack Docker"
 	@echo "  make docker-logs    acompanha logs da API"
@@ -42,12 +42,13 @@ docker-up:
 	@test -f .env || cp .env-sample .env
 	$(COMPOSE) up -d --build
 	@echo ""
-	@echo "Stack base (API + PostgreSQL)."
+	@echo "Stack (API + PostgreSQL + pgAdmin)."
 	@echo "  Banco: init_db/database.sql roda no PRIMEIRO start do volume."
 	@echo "  API:     http://localhost:8000/docs"
+	@echo "  pgAdmin: http://localhost:5050"
 	@echo "  Health:  http://localhost:8000/health/ready"
-	@echo "  Dev+pgAdmin: make dev"
-	@echo "  Reset DB:    make docker-fresh"
+	@echo "  Hot reload: make dev"
+	@echo "  Reset DB:   make docker-fresh"
 
 dev: up-dev
 
@@ -55,7 +56,7 @@ up-dev:
 	@test -f .env || cp .env-sample .env
 	$(COMPOSE_DEV) up -d --build
 	@echo ""
-	@echo "Stack DEV (API reload + pgAdmin)."
+	@echo "Stack DEV (API hot reload)."
 	@echo "  API:     http://localhost:8000/docs"
 	@echo "  pgAdmin: http://localhost:5050"
 	@echo "  Banco:   init_db/ no primeiro up  |  reset: make docker-fresh"
@@ -75,7 +76,7 @@ docker-fresh:
 	@echo "Volume apagado — init_db/database.sql será reaplicado no PostgreSQL."
 
 docker-logs:
-	$(COMPOSE) logs -f api_login
+	$(COMPOSE) logs -f api_gt
 
 clean:
 	rm -rf build dist *.egg-info htmlcov .pytest_cache .ruff_cache .coverage coverage.xml .mypy_cache

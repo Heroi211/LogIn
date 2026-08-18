@@ -1,8 +1,9 @@
 # Override de desenvolvimento — use com:
 #   docker compose -f docker-compose.yaml -f docker-compose.dev.yaml up
+# (hot reload da API; pgAdmin já sobe no compose base)
 
 services:
-  api_login:
+  api_gt:
     command: sh -c "python -m uvicorn main:app --host 0.0.0.0 --port 8000 --reload"
     volumes:
       - .:/var/www
@@ -10,21 +11,3 @@ services:
     environment:
       APP_ENV: development
       DEBUG: "true"
-
-  pgadmin:
-    build:
-      dockerfile: ./docker/pgadmin.dockerfile
-      context: .
-    image: pgadmin_db:v1
-    container_name: pgadmin_db
-    env_file:
-      - .env
-    environment:
-      PGADMIN_DEFAULT_EMAIL: ${PGADMIN_EMAIL}
-      PGADMIN_DEFAULT_PASSWORD: ${PGADMIN_PASSWORD}
-    ports:
-      - "5050:80"
-    depends_on:
-      - db_login
-    networks:
-      - nwlogin

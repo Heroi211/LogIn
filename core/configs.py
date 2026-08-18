@@ -24,7 +24,7 @@ def _env_bool(name: str, default: bool = False) -> bool:
 class Settings(BaseSettings):
     # --- Aplicação ---
     APP_ENV: str = os.getenv("APP_ENV", "development")
-    PROJECT_NAME = os.getenv("PROJECT_NAME", "LogIn API")
+    PROJECT_NAME = os.getenv("PROJECT_NAME", "Gestao Tickets")
     PROJECT_VERSION = os.getenv("PROJECT_VERSION", "/v1")
 
     # Branding (e-mails, textos exibidos ao usuário)

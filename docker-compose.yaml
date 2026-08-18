@@ -1,15 +1,15 @@
-version: "3.9"
+name: gestao_tickets
 
-# Stack base — produção/staging (API + PostgreSQL)
-# Desenvolvimento: docker compose -f docker-compose.yaml -f docker-compose.dev.yaml up
+# Stack base — produção/staging (API + PostgreSQL + pgAdmin)
+# Hot reload: docker compose -f docker-compose.yaml -f docker-compose.dev.yaml up
 
 services:
-  db_login:
+  database_gt:
     build:
       dockerfile: ./docker/db.dockerfile
       context: .
-    image: login_database:v1
-    container_name: database_login
+    image: gestao_tickets_database:v1
+    container_name: database_gt
     env_file:
       - .env
     environment:
@@ -19,9 +19,9 @@ services:
     ports:
       - "${DATABASE_PORT:-5432}:5432"
     networks:
-      - nwlogin
+      - gestao_tickets
     volumes:
-      - pgdata:/var/lib/postgresql/data/
+      - gestao_tickets_pgdata:/var/lib/postgresql/data/
       - ./init_db:/docker-entrypoint-initdb.d/
     healthcheck:
       test: ["CMD-SHELL", "pg_isready -U ${DATABASE_USER} -d ${DATABASE_NAME}"]
@@ -29,22 +29,22 @@ services:
       timeout: 5s
       retries: 5
 
-  api_login:
+  api_gt:
     build:
       dockerfile: ./docker/api.dockerfile
       context: .
-    image: login_api:v1
-    container_name: api_login
+    image: gestao_tickets_api:v1
+    container_name: api_gt
     command: sh -c "python main.py"
     env_file:
       - .env
     depends_on:
-      db_login:
+      database_gt:
         condition: service_healthy
     ports:
       - "8000:8000"
     networks:
-      - nwlogin
+      - gestao_tickets
     volumes:
       - ./logs:/var/www/logs
     healthcheck:
@@ -54,10 +54,30 @@ services:
       retries: 3
       start_period: 20s
 
+  pgadmin_gt:
+    build:
+      dockerfile: ./docker/pgadmin.dockerfile
+      context: .
+    image: gestao_tickets_pgadmin:v1
+    container_name: pgadmin_gt
+    env_file:
+      - .env
+    environment:
+      PGADMIN_DEFAULT_EMAIL: ${PGADMIN_EMAIL}
+      PGADMIN_DEFAULT_PASSWORD: ${PGADMIN_PASSWORD}
+    ports:
+      - "5050:80"
+    depends_on:
+      database_gt:
+        condition: service_healthy
+    networks:
+      - gestao_tickets
+
 networks:
-  nwlogin:
-    name: "nwlogin"
-    driver: "bridge"
+  gestao_tickets:
+    name: gestao_tickets
+    driver: bridge
 
 volumes:
-  pgdata:
+  gestao_tickets_pgdata:
+    name: gestao_tickets_pgdata
