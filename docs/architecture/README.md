@@ -54,6 +54,7 @@ Ver [bounded_contexts.md](./bounded_contexts.md) e [identity_access/](./identity
 
 ## Documentos
 
+- [**SYSTEM_OVERVIEW.md**](./SYSTEM_OVERVIEW.md) — diagramas visuais (alto nível + organização)
 - [identity_access/README.md](./identity_access/README.md)
 - [identity_access/public_api.md](./identity_access/public_api.md)
 - [identity_access/context_map.md](./identity_access/context_map.md)

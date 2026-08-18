@@ -20,6 +20,7 @@ Leia na ordem indicada conforme o tipo de tarefa.
 | **[`docs/TROUBLESHOOTING.md`](docs/TROUBLESHOOTING.md)** | Diagnóstico: login, 403, banco, correlation ID | Problemas em runtime |
 | **[`docs/architecture/golden_rules.md`](docs/architecture/golden_rules.md)** | Checklist de camadas — o que pode/não pode em domain, application, etc. | **Code review** e conformidade |
 | **[`docs/architecture/README.md`](docs/architecture/README.md)** | Visão geral Clean Architecture + bounded contexts | Entender estrutura macro |
+| **[`docs/architecture/SYSTEM_OVERVIEW.md`](docs/architecture/SYSTEM_OVERVIEW.md)** | **Diagramas visuais** — alto nível, camadas, RBAC, pastas | Visão do sistema |
 | **[`docs/architecture/identity_access/public_api.md`](docs/architecture/identity_access/public_api.md)** | Contratos entre bounded contexts (`UserId`, `AuthorizationService`) | Integrar **outro módulo** com Identity |
 | **[`docs/README.md`](docs/README.md)** | Índice da pasta `docs/` | Navegação |
 | **[`init_db/README.md`](init_db/README.md)** | Como o SQL é aplicado (Docker init, reset) | Banco / seed |
