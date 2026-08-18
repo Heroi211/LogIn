@@ -1,0 +1,19 @@
+from __future__ import annotations
+
+from typing import Protocol
+
+from contexts.identity_access.domain.entities.permission import Permission
+
+
+class PermissionRepository(Protocol):
+    async def list_active(self) -> list[Permission]: ...
+
+    async def get_by_code(self, code: str) -> Permission | None: ...
+
+    async def add(self, permission: Permission) -> Permission: ...
+
+    async def get_codes_for_role(self, role_id: int) -> frozenset[str]: ...
+
+    async def set_role_permissions(self, role_id: int, permission_codes: list[str]) -> frozenset[str]: ...
+
+    async def list_codes_for_role(self, role_id: int) -> list[str]: ...

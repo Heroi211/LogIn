@@ -29,9 +29,14 @@ def setup_root_logging() -> None:
 
     if not already_has_stream:
         handler = logging.StreamHandler(sys.stdout)
-        handler.setFormatter(
-            logging.Formatter("%(asctime)s | %(levelname)s | %(name)s | %(message)s")
-        )
+        if settings.LOG_FORMAT.strip().lower() == "json":
+            from core.logging_json import JsonLogFormatter
+
+            handler.setFormatter(JsonLogFormatter())
+        else:
+            handler.setFormatter(
+                logging.Formatter("%(asctime)s | %(levelname)s | %(name)s | %(message)s")
+            )
         handler.setLevel(settings.get_log_level())
         root.addHandler(handler)
 

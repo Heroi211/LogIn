@@ -1,5 +1,8 @@
 version: "3.9"
 
+# Stack base — produção/staging (API + PostgreSQL)
+# Desenvolvimento: docker compose -f docker-compose.yaml -f docker-compose.dev.yaml up
+
 services:
   db_login:
     build:
@@ -14,12 +17,17 @@ services:
       POSTGRES_PASSWORD: ${DATABASE_PASS}
       POSTGRES_DB: ${DATABASE_NAME}
     ports:
-      - 5432:5432
+      - "${DATABASE_PORT:-5432}:5432"
     networks:
       - nwlogin
     volumes:
       - pgdata:/var/lib/postgresql/data/
       - ./init_db:/docker-entrypoint-initdb.d/
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${DATABASE_USER} -d ${DATABASE_NAME}"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
 
   api_login:
     build:
@@ -31,35 +39,25 @@ services:
     env_file:
       - .env
     depends_on:
-      - db_login
+      db_login:
+        condition: service_healthy
     ports:
-      - 8000:8000
+      - "8000:8000"
     networks:
       - nwlogin
     volumes:
       - ./logs:/var/www/logs
-
-  pgadmin:
-    build:
-      dockerfile: ./docker/pgadmin.dockerfile
-      context: .
-    image: pgadmin_db:v1
-    container_name: pgadmin_db
-    env_file:
-      - .env
-    environment:
-      PGADMIN_DEFAULT_EMAIL: ${PGADMIN_EMAIL}
-      PGADMIN_DEFAULT_PASSWORD: ${PGADMIN_PASSWORD}
-    ports:
-      - 5050:80
-    depends_on:
-      - db_login
-    networks:
-      - nwlogin
+    healthcheck:
+      test: ["CMD-SHELL", "python -c \"import urllib.request; urllib.request.urlopen('http://127.0.0.1:8000/health')\""]
+      interval: 15s
+      timeout: 5s
+      retries: 3
+      start_period: 20s
 
 networks:
   nwlogin:
     name: "nwlogin"
     driver: "bridge"
+
 volumes:
   pgdata:

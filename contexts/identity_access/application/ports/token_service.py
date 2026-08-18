@@ -1,0 +1,9 @@
+from typing import Protocol
+
+
+class TokenService(Protocol):
+    def create_access_token(self, user_id: int) -> str: ...
+
+    def create_refresh_token(self, user_id: int) -> str: ...
+
+    def verify_refresh_token(self, token: str) -> int: ...
